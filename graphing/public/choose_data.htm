@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Untitled Page</title>
+    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dataset_colors.css">
+    <link href='http://fonts.googleapis.com/css?family=Days+One' rel='stylesheet' type='text/css'>
+    <script>
+
+        var params = ["OS", "Analysis", "Classification", "Date", "Analyis_Parameters", "Classes"];
+        var colors = ["MediumPurple", "steelblue", "DarkSeaGreen", "MediumPurple", "steelblue", "DarkSeaGreen"];
+        var options = {};
+        options["OS"] = ["Windows", "Linux"];
+        options["Analysis"] = ["CPU Utilization and C Power States", "Host Memory Utilization", "Host Uptime and downtime periods", "CPU Thermal Sensor", "MultiCoreConcureentIdle"];
+        options["Classification"] = ["HOSTPLATFORM", "PRODUCTFAMILY", "MAXCLOCKSPEED", "BRANDSTRING", "NUMPHYSICAL", "NUMCORES", "NUMLOGICAL", "COREPERPHYSICAL"];
+        options["Date"] = function () {
+            var today = new Date();
+            var arr = [today.toDateString()];
+            for (var i = 1; i < 5; i++) {
+                today.setDate(today.getDate()-30*i);
+                arr.push(today.toDateString());
+            }
+            return arr;
+
+        } ();
+        options["Analyis_Parameters"] = [];
+        options["Classes"] = [];
+
+        Analyis_Parameters = {};
+        Analyis_Parameters["CPU Utilization and C Power States"] = ["Busy", "Idle", "C0"];
+        Analyis_Parameters["Host Memory Utilization"] = ["utilOpt1", "utilOpt2", "utilOpt3"];
+
+        Categories = {};
+        Categories["PRODUCTFAMILY"] = ["Laptop", "Servers", "Notebooks", "Mobile"];
+        Categories["HOSTPLATFORM"] = ["Laptop", "Servers", "Notebooks", "Mobile"];
+
+        $(document).ready(function () {
+
+            params.forEach(function (param, i) {
+
+                var $paramDiv = $('<div></div>').css("background-color", colors[i]).attr('class', "param_div").attr('id', param);
+                $('#inputs').append($paramDiv);
+
+                $('<h1></h1>').text((i + 1) + ") " + param).click(openThis).css('cursor', 'pointer').appendTo($paramDiv);
+                var selectorDiv = $('<div></div>').appendTo($paramDiv)
+
+                if (param != "Classes") {
+                    $('<div class="styled-select"><select name="' + param + '"><option>Select ' + param + '</option></select></div>').appendTo(selectorDiv);
+
+                    options[param].forEach(function (opt2, j) {
+                        selectorDiv.find('select').append($('<option></option>').attr('value', opt2).text(opt2));
+                    })
+                }
+
+            });
+
+            $('select').change(function () {
+                $(this).parent().parent().animate({ height: '0px' }, "slow", "swing", function () {
+                    $(this).parent().next().children().eq(1).animate({ height: '100px' }, { easing: "swing" });
+                });
+
+                if (($(this).attr("name") == "Analysis")) {
+                    var selectedAnalysis = $(this).find(":selected").text();
+                    Analyis_Parameters[selectedAnalysis].forEach(function (p, i) {
+
+                        //TO DO: first clear the current options
+                        $('[name=Analyis_Parameters]').append('<option value=' + p + '>' + p + '</option>');
+                    });
+                } else if (($(this).attr("name") == "Classification")) {
+                    var selectedClassification = $(this).find(":selected").text();
+                    Categories[selectedClassification].forEach(function (p, i) {
+                        var checkItem = $('<input type="checkbox" name="plot_class[]" value="' + p + '">')
+                            .change(function () {
+                                if ($('input:checkbox:checked').length > 3) {
+                                    $(this).attr("checked", false);
+                                    alert('Cannot check more than 3 items.');
+                                }
+                            });
+
+                        $('#Classes.param_div div').append(checkItem).append(p + '<br>');
+                    });
+                }
+
+            });
+
+            function openThis() {
+                $(this).next().animate({ height: '100px' }, { easing: "swing" });
+                $(this).unbind('click', openThis);
+                $(this).click(closeThis);
+            }
+
+            function closeThis() {
+                $(this).next().animate({ height: '0px' }, { easing: "swing" });
+                $(this).unbind('click', closeThis);
+                $(this).click(openThis);
+            }
+
+            $('.param_div div').first().animate({ height: '50px' }, { easing: "swing" });
+
+        });
+    </script>
+</head>
+<body style="margin: 0px; background-color: MediumPurple;">
+
+    <form method="post" action="/plot_selected">
+        <div id="inputs"></div>
+        <input id="plotButton" class="button" type="submit" value="Plot data">
+    </form>
+</body>
+</html>

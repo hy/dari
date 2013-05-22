@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+svg {
+  font: 10px sans-serif;
+}
+
+.y.axis path {
+  display: none;
+}
+
+.y.axis line {
+  stroke: #fff;
+  stroke-opacity: .2;
+  shape-rendering: crispEdges;
+}
+
+.y.axis .zero line {
+  stroke: #000;
+  stroke-opacity: 1;
+}
+
+.title {
+  font: 300 40px Helvetica Neue;
+  fill: #666;
+}
+
+.birthyear,
+.age {
+  text-anchor: middle;
+}
+
+.size
+{
+    fill: blue;
+}
+
+.birthyear {
+  fill: #fff;
+}
+
+rect {
+  fill-opacity: .6;
+  /*fill: #e377c2; */
+}
+
+rect:first-child {
+ /* fill: #1f77b4; */
+}
+
+</style>
+<body>
+<form>
+  <label><input type="radio" name="dataset" value="size" checked> By Size</label>
+  <label><input type="radio" name="dataset" value="type"> By Type</label>
+  <label><input type="radio" name="dataset" value="pie"> Pie</label>
+</form>
+
+<div id="legend"></div>
+</body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+    function clone(obj) {
+        if (obj == null || typeof (obj) != 'object')
+            return obj;
+
+        var temp = obj.constructor(); // changed
+
+        for (var key in obj)
+            temp[key] = clone(obj[key]);
+        return temp;
+    }
+
+    //modeling the data
+    var colorsByType = {
+        NHM: "blue",
+        WSM: "red",
+        JKT: "green"
+    };
+
+    var colorsBySize = {};
+    colorsBySize["48"]="red";
+    colorsBySize["128"]="blue";
+    colorsBySize["144"]="green";
+    colorsBySize["256"] = "purple";
+    colorsBySize["72/94"] = "yellow";
+
+    var dataByDomains = {
+                            size: {
+                                data: null,
+                                yMax: null,
+                                colorPicker: colorsByType
+                            },
+                            type: {
+                                data: null,
+                                yMax: null,
+                                colorPicker: colorsBySize
+                            }
+                        };
+
+    var rawData = null;
+
+    //choosing the data
+    var selectedDomain = "type";
+    var colorBy = "";
+    switchDomain();
+
+    function switchDomain() {
+        colorBy = selectedDomain;
+        selectedDomain = (selectedDomain == "size") ? "type" : "size";
+    };
+
+
+    //setting the stage
+    var margin = { top: 20, right: 40, bottom: 30, left: 20 },
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom,
+    barWidth = Math.floor(width / 19) - 1;
+    var radius = Math.min(width, height) / 2;
+
+    var x = d3.scale.ordinal()
+    .rangeBands([barWidth / 2, width - barWidth / 2]);
+
+    var y = d3.scale.linear()
+    .range([height, 0]);
+
+    var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("right")
+    .tickSize(-width)
+    //.tickFormat(function (d) { return Math.round(d / 1e6) + "M"; });
+
+
+    var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(radius - 100);
+
+    var arc2 = d3.svg.arc()
+    .outerRadius(radius - 100)
+    .innerRadius(radius - 200);
+
+    var pie = d3.layout.pie()
+    .sort(function (a, b) {
+        return a.type < b.type ? -1 : a.type > b.type ? 1 : 0;
+    })
+    .value(function (d) { return d.systems; });
+
+    var pie2 = d3.layout.pie()
+    .sort(function (a, b) {
+        return a.size < b.size ? -1 : a.size > b.size ? 1 : 0;
+    })
+    .value(function (d) { return d.systems; });
+
+
+
+    // An SVG element with a bottom-right origin.
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
+
+
+
+
+    d3.csv("systems_monitored.csv", processData);
+
+
+    function processData(error, data) {
+
+        data.forEach(function (d) {
+            d.systems = +d.systems;
+        });
+
+        rawData = data;
+
+        for (var domain in dataByDomains){
+        
+            var yMax = 0;
+            var nestedData = d3.nest()
+                .key(function (d) { return d[domain]; })
+                .rollup(function (v) {
+                    var res = clone(v);
+                    var cum = 0;
+                    for (var i = 0; i < v.length; i++) {
+                        res[i]["y"] = v[i].systems + cum;
+                        cum += v[i].systems;
+                    }
+
+                    if (cum > yMax)
+                        yMax = cum;
+
+                    return res;
+                })
+                .map(data);
+
+                dataByDomains[domain].data = nestedData;
+                dataByDomains[domain].yMax = yMax;
+        }
+
+        displayData(selectedDomain);
+    }
+
+    function displayData(domain){
+        var data = dataByDomains[domain].data;
+
+        // A sliding container to hold the bars by birthyear.
+        var birthyears = svg.append("g")
+            .attr("class", "birthyears");
+
+        // A label for the current year.
+        var title = svg.append("text")
+            .attr("class", "title")
+            .attr("dy", ".71em")
+            .text("# of Systems Monitored");
+
+
+        // Add an axis to show the population values.
+        y.domain([0, dataByDomains[domain].yMax]); //to do: get rid of ymax, and calculate another way
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(" + width + ",0)")
+            .call(yAxis)
+            .selectAll("g")
+            .filter(function (value) { return !value; })
+            .classed("zero", true);
+
+        // Add labeled rects for each birthyear (so that no enter or exit is required).
+        x.domain(d3.keys(data));
+       
+        var birthyear = birthyears.selectAll(".birthyear")
+            .data(d3.keys(data))
+            .enter().append("g")
+            .attr("class", "birthyear")
+            .attr("transform", function (birthyear) { return "translate(" + x(birthyear) + ",0)"; });
+
+        birthyear.selectAll("rect")
+            .data(function (birthyear) { return data[birthyear] || { type: "", size: "", systems: 0 }; })
+            .enter()
+            .append("rect")
+            .attr("y", height)
+        .attr("height", function (value) { return 0; })
+            .transition()
+        .duration(750)
+            .attr("x", -barWidth / 2)
+            .attr("width", barWidth)
+            .attr("y", function (d, i) {
+                return y(d.y);
+            })
+            .attr("height", function (value) {
+                return height - y(value.systems);
+            })
+            .attr("fill", function (d, i) {
+                return dataByDomains[domain].colorPicker[d[colorBy]];
+            });
+
+        // Add labels to show birthyear.
+        birthyear.append("text")
+            .attr("y", height + 10)
+            .attr("class", "size")
+            .text(function (birthyear) { return birthyear; });
+
+        var legend = d3.select("#legend");
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Allow the arrow keys to change the displayed year.
+        window.focus();
+        d3.select(window).on("keydown", function () {
+            switch (d3.event.keyCode) {
+                case 37: switchDomain(); break;
+                case 39: switchDomain(); break;
+            }
+            update();
+        });
+
+        function update() {
+        //            if (!(year in data)) return;
+        //            title.text(year);
+
+        //            birthyears.transition()
+        //        .duration(750)
+        //        .attr("transform", "translate(" + (x(year1) - x(year)) + ",0)");
+                birthyear.selectAll("rect")
+                //.data(function (birthyear) { return data[year][birthyear] || [0, 0]; })
+            .transition()
+            .duration(750)
+            .attr("y", height)
+            .attr("height", function (value) { return 0; })
+            .each("end", function () {
+                d3.selectAll(svg[0][0].childNodes).remove();
+                displayData(selectedDomain);
+            });
+
+        }
+
+
+
+
+    d3.selectAll("input").on("change", change);
+
+    function change() {
+
+        var displayfunc = null;
+
+        if (this.value == "pie") {
+
+            displayfunc = function () {
+                drawPie(rawData);
+                svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            }
+
+        } else {
+            selectedDomain = this.value;
+            colorBy = (selectedDomain == "size") ? "type" : "size";
+            displayfunc = function () {
+                displayData(selectedDomain);
+            }
+        };
+
+        birthyear.selectAll("rect")
+                .transition()
+                .duration(750)
+                .attr("y", height)
+                .attr("height", function (value) { return 0; })
+                .each("end", function () {
+                    d3.selectAll(svg[0][0].childNodes).remove();
+                    displayfunc();
+                });
+
+    }
+
+
+
+    }
+
+
+    function drawPie(data) {
+
+        var g = svg.selectAll(".arc")
+      .data(pie(data))
+    .enter().append("g")
+      .attr("class", "arc");
+
+        g.append("path")
+      .attr("d", arc)
+      .style("fill", function (d) {
+          return colorsByType[d.data.type];
+      });
+
+        g.append("text")
+      .attr("transform", function (d) { return "translate(" + arc.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .style("text-anchor", "middle")
+      .text(function (d) { return d.data.size; });
+
+
+        var g2 = svg.selectAll(".arc2")
+      .data(pie2(data))
+    .enter().append("g")
+      .attr("class", "arc2");
+
+        g2.append("path")
+      .attr("d", arc2)
+      .style("fill", function (d) {
+          return colorsBySize[d.data.size];
+      });
+
+        g2.append("text")
+      .attr("transform", function (d) { return "translate(" + arc2.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .style("text-anchor", "middle")
+      .text(function (d) { return d.data.type; });
+    }
+
+
+
+
+</script>
