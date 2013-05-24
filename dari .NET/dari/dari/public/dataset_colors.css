@@ -1,0 +1,143 @@
+﻿body 
+{
+    font-family: Verdana;
+   /* margin: 0px;
+    background-color: MediumPurple;*/
+    
+}
+
+.stroke_color0{
+     stroke: purple;
+}
+.stroke_color1{
+     stroke: DarkBlue;
+}
+.stroke_color2{
+     stroke: OliveDrab;
+}
+
+.fill_color0 {
+     fill: #D3BCEB;
+}
+.fill_color1 {
+     fill: LightBlue;
+}
+.fill_color2 {
+     fill: YellowGreen;
+}
+
+.overlay_color0 {
+     fill: MediumPurple;
+}
+.overlay_color1 {
+     fill: steelblue;
+}
+.overlay_color2 {
+     fill: DarkSeaGreen;
+}
+
+
+.bgColor0 {
+    background-color: MediumPurple;
+    background-color: rgba(147,112,219,0.5)
+}
+.bgColor1 {
+     background-color: steelblue;
+    background-color: rgba(70,130,180,0.5)
+}
+.bgColor2 {
+     background-color: DarkSeaGreen;
+    background-color: rgba(143,188,143,0.5)
+}
+
+.text_color0 {
+     color: #D3BCEB;
+     background-color: White;
+}
+.text_color1 {
+     color: LightBlue;
+     background-color: White;
+}
+.text_color2 {
+     color: YellowGreen;
+     background-color: White;
+}
+
+
+h1, h2, h3, th
+{
+    font-family:  'Days One', sans-serif;
+}
+
+.fontA
+{
+    font-family:  'Days One', sans-serif;
+}
+
+tr
+{
+    /*padding: 3px;*/
+}
+
+button 
+{
+    background-color: steelblue;
+    font-family:  'Days One', sans-serif;
+    padding: 5px;
+    color: White;
+}
+
+
+.hidden 
+{
+    visibility: hidden;
+}
+
+.param_div
+{
+    margin: 0px;
+    padding: 5px 20px;
+    color: White;
+}
+
+.param_div > div
+{
+    height: 0px;
+    overflow-y: hidden;
+}
+
+.button 
+{
+    background-color: DarkSeaGreen;
+    font-family:  'Days One', sans-serif;
+    font-size:large;
+    padding: 20px;
+    margin: 20px;
+    color: White;
+}
+
+.styled-select {
+   width: 240px;
+   height: 34px;
+   overflow: hidden;
+   background: url(down_arrow_select.jpg) no-repeat right #ddd;
+   border: 3px solid White;
+   border-radius: 5px;
+   }
+   
+   .styled-select select {
+   background: transparent;
+   width: 268px;
+   padding: 5px;
+   font-size: 16px;
+   line-height: 1;
+   border: 0;
+   border-radius: 0;
+   height: 34px;
+   -webkit-appearance: none;
+   }
+   
+.axis text 
+{
+    font-size: 20
+}

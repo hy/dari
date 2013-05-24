@@ -1,0 +1,5 @@
+C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\dari.dll
+C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\dari.pdb
+C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\dari.dll
+C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\dari.pdb

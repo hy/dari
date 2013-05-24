@@ -51,18 +51,16 @@ rect:first-child {
 
 </style>
 <body>
+<form>
+  <label><input type="radio" name="dataset" value="size" checked> By Size</label>
+  <label><input type="radio" name="dataset" value="type"> By Type</label>
+  <label><input type="radio" name="dataset" value="pie"> Pie</label>
+</form>
+
+<div id="legend"></div>
+</body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-
-//    Object.prototype.duplicate = function () {
-//        var newObj = (this instanceof Array) ? [] : {};
-//        for (var i in this) {
-//            if (i == 'clone') continue;
-//            if (this[i] && typeof this[i] == "object") {
-//                newObj[i] = this[i].duplicate();
-//            } else newObj[i] = this[i]
-//        } return newObj;
-    //    };
 
     function clone(obj) {
         if (obj == null || typeof (obj) != 'object')
@@ -102,8 +100,10 @@ rect:first-child {
                             }
                         };
 
+    var rawData = null;
+
     //choosing the data
-    var selectedDomain = "<%= params[:domain] %>";
+    var selectedDomain = "type";
     var colorBy = "";
     switchDomain();
 
@@ -118,6 +118,7 @@ rect:first-child {
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom,
     barWidth = Math.floor(width / 19) - 1;
+    var radius = Math.min(width, height) / 2;
 
     var x = d3.scale.ordinal()
     .rangeBands([barWidth / 2, width - barWidth / 2]);
@@ -132,12 +133,39 @@ rect:first-child {
     //.tickFormat(function (d) { return Math.round(d / 1e6) + "M"; });
 
 
+    var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(radius - 100);
+
+    var arc2 = d3.svg.arc()
+    .outerRadius(radius - 100)
+    .innerRadius(radius - 200);
+
+    var pie = d3.layout.pie()
+    .sort(function (a, b) {
+        return a.type < b.type ? -1 : a.type > b.type ? 1 : 0;
+    })
+    .value(function (d) { return d.systems; });
+
+    var pie2 = d3.layout.pie()
+    .sort(function (a, b) {
+        return a.size < b.size ? -1 : a.size > b.size ? 1 : 0;
+    })
+    .value(function (d) { return d.systems; });
+
+
+
     // An SVG element with a bottom-right origin.
     var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
+
 
 
 
@@ -149,6 +177,8 @@ rect:first-child {
         data.forEach(function (d) {
             d.systems = +d.systems;
         });
+
+        rawData = data;
 
         for (var domain in dataByDomains){
         
@@ -215,6 +245,10 @@ rect:first-child {
             .data(function (birthyear) { return data[birthyear] || { type: "", size: "", systems: 0 }; })
             .enter()
             .append("rect")
+            .attr("y", height)
+        .attr("height", function (value) { return 0; })
+            .transition()
+        .duration(750)
             .attr("x", -barWidth / 2)
             .attr("width", barWidth)
             .attr("y", function (d, i) {
@@ -233,7 +267,20 @@ rect:first-child {
             .attr("class", "size")
             .text(function (birthyear) { return birthyear; });
 
- 
+        var legend = d3.select("#legend");
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Allow the arrow keys to change the displayed year.
         window.focus();
         d3.select(window).on("keydown", function () {
@@ -245,63 +292,105 @@ rect:first-child {
         });
 
         function update() {
-//            if (!(year in data)) return;
-//            title.text(year);
+        //            if (!(year in data)) return;
+        //            title.text(year);
 
-//            birthyears.transition()
-//        .duration(750)
-//        .attr("transform", "translate(" + (x(year1) - x(year)) + ",0)");
+        //            birthyears.transition()
+        //        .duration(750)
+        //        .attr("transform", "translate(" + (x(year1) - x(year)) + ",0)");
+                birthyear.selectAll("rect")
+                //.data(function (birthyear) { return data[year][birthyear] || [0, 0]; })
+            .transition()
+            .duration(750)
+            .attr("y", height)
+            .attr("height", function (value) { return 0; })
+            .each("end", function () {
+                d3.selectAll(svg[0][0].childNodes).remove();
+                displayData(selectedDomain);
+            });
 
-//            birthyear.selectAll("rect")
-//        .data(function (birthyear) { return data[year][birthyear] || [0, 0]; })
-//      .transition()
-//        .duration(750)
-//        .attr("y", y)
-            //        .attr("height", function (value) { return height - y(value); });
-
-            d3.selectAll(svg.childNodes).remove();
-            displayData(selectedDomain);
         }
+
+
+
+
+    d3.selectAll("input").on("change", change);
+
+    function change() {
+
+        var displayfunc = null;
+
+        if (this.value == "pie") {
+
+            displayfunc = function () {
+                drawPie(rawData);
+                svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            }
+
+        } else {
+            selectedDomain = this.value;
+            colorBy = (selectedDomain == "size") ? "type" : "size";
+            displayfunc = function () {
+                displayData(selectedDomain);
+            }
+        };
+
+        birthyear.selectAll("rect")
+                .transition()
+                .duration(750)
+                .attr("y", height)
+                .attr("height", function (value) { return 0; })
+                .each("end", function () {
+                    d3.selectAll(svg[0][0].childNodes).remove();
+                    displayfunc();
+                });
+
     }
-/*
-    var radius = Math.min(width, height) / 2;
 
-var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-var arc = d3.svg.arc()
-    .outerRadius(radius - 10)
-    .innerRadius(0);
 
-var pie = d3.layout.pie()
-    .sort(null)
-    .value(function(d) { return d.population; });
+    }
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-  .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-d3.csv("data.csv", function(error, data) {
+    function drawPie(data) {
 
-  data.forEach(function(d) {
-    d.population = +d.population;
-  });
-
-  var g = svg.selectAll(".arc")
+        var g = svg.selectAll(".arc")
       .data(pie(data))
     .enter().append("g")
       .attr("class", "arc");
 
-  g.append("path")
+        g.append("path")
       .attr("d", arc)
-      .style("fill", function(d) { return color(d.data.age); });
+      .style("fill", function (d) {
+          return colorsByType[d.data.type];
+      });
 
-  g.append("text")
-      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+        g.append("text")
+      .attr("transform", function (d) { return "translate(" + arc.centroid(d) + ")"; })
       .attr("dy", ".35em")
       .style("text-anchor", "middle")
-      .text(function(d) { return d.data.age; });
-      */
+      .text(function (d) { return d.data.size; });
+
+
+        var g2 = svg.selectAll(".arc2")
+      .data(pie2(data))
+    .enter().append("g")
+      .attr("class", "arc2");
+
+        g2.append("path")
+      .attr("d", arc2)
+      .style("fill", function (d) {
+          return colorsBySize[d.data.size];
+      });
+
+        g2.append("text")
+      .attr("transform", function (d) { return "translate(" + arc2.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .style("text-anchor", "middle")
+      .text(function (d) { return d.data.type; });
+    }
+
+
+
+
 </script>
