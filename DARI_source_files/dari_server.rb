@@ -1,21 +1,11 @@
 require 'rubygems'
 require 'sinatra'
 require 'rvg/rvg'
+require 'json'
 include Magick
 
 Tilt.register Tilt::ERBTemplate, 'html'
 
-class Array
-  def every(n)
-    select {|x| index(x) % n == 0}
-  end
-  def every_other
-    every 2
-  end
-  def pct(n)
-  	self[key * self.length/100]
-  end
-end
 
 get'/' do
 	"<h1>Welcome to the DARI Server!</h1><a href='/choose_data.htm'>data chooser UI</a><br><a href='/choose_data.htm'>data chooser UI</a>"
@@ -45,19 +35,22 @@ post '/plot_selected' do
 end
 
 get '/plotter' do
-	#result = ""
+
+	class Array
+	  def pct(n)
+  		self[n * self.length/100]
+	  end
+	end
+
 	@temperature_a = ['1','2','3','4', '5'] #remove
-	#@temperature_a.each do |inv|
-	#    result << (inv + ",")
-	#end
-	#File.open('public/data.csv', 'w') { |file| file.write(result.chop) }
+
 	@temperature_a.sort
 	array_info = [{
 		name: "unnamed series",
-		p5: arr.pct(5),
-		p95: arr.pct(95),
+		p5: @temperature_a.pct(5),
+		p95: @temperature_a.pct(95),
 		mean: @temperature_a.reduce(:+).to_f / @temperature_a.size,
-		median: arr.pct(50)
+		median: @temperature_a.pct(50)
 		}]
 	result = {
 		arrays: [@temperature_a], 
@@ -67,6 +60,7 @@ get '/plotter' do
 		array_info: array_info}
 
 
-	arr = IO.popen(["C:\\Python33\\python.exe", "public/process_data.py"]).gets
+	#arr = IO.popen(["C:\\Python33\\python.exe", "public/process_data.py"]).gets
+	arr = result.to_json
 	erb :summary_plots, :locals => {:arr => arr, :analysis => params[:Analysis], :os => params[:OS], :classification => params[:Classification]}
 end
