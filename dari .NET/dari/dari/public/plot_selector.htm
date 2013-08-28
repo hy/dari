@@ -7,32 +7,30 @@
     <link href='http://fonts.googleapis.com/css?family=Days+One' rel='stylesheet' type='text/css'>
     <script>
 
-        var params = ["OS", "Analysis", "Classification", "Date", "Analyis_Parameters", "Classes"];
+        var params = ["OS", "Analysis", "Classification", "Date", "Analysis_Parameters", "Classes"];
         var colors = ["MediumPurple", "steelblue", "DarkSeaGreen", "MediumPurple", "steelblue", "DarkSeaGreen"];
+
         var options = {};
         options["OS"] = ["Windows", "Linux"];
-        options["Analysis"] = ["CPU Utilization and C Power States", "Host Memory Utilization", "Host Uptime and downtime periods", "CPU Thermal Sensor", "MultiCoreConcureentIdle"];
+        options["Analysis"] = [
+            "CPU Utilization and C Power States",
+            "Host Memory Utilization",
+            "Host Uptime and downtime periods",
+            "CPU Thermal Sensor",
+            "MultiCoreConcureentIdle"];
         options["Classification"] = ["HOSTPLATFORM", "PRODUCTFAMILY", "MAXCLOCKSPEED", "BRANDSTRING", "NUMPHYSICAL", "NUMCORES", "NUMLOGICAL", "COREPERPHYSICAL"];
-        options["Date"] = function () {
-            var today = new Date();
-            var arr = [today.toDateString()];
-            for (var i = 1; i < 5; i++) {
-                today.setDate(today.getDate()-30*i);
-                arr.push(today.toDateString());
-            }
-            return arr;
-
-        } ();
-        options["Analyis_Parameters"] = [];
+        options["Date"] = []
+        options["Analysis_Parameters"] = [];
         options["Classes"] = [];
 
-        Analyis_Parameters = {};
-        Analyis_Parameters["CPU Utilization and C Power States"] = ["Busy", "Idle", "C0"];
-        Analyis_Parameters["Host Memory Utilization"] = ["utilOpt1", "utilOpt2", "utilOpt3"];
+        Analysis_Parameters = {};
+        Analysis_Parameters["CPU Utilization and C Power States"] = ["Busy", "Idle", "C0", "C1", "C2", "C3", "C1C2C3", "C2C3"];
+        Analysis_Parameters["Host Memory Utilization"] = ["PERCENT_MEMUTIL"];
+        Analysis_Parameters["Host Uptime and downtime periods"] = ["NUMPERDAY_DOWN", "NUMPERDAY_MIXED", "NUMPERDAY_OFF", "NUMPERDAY_OFFONLY", "NUMPERDAY_SUSPEND",
+         "NUMPERDAY_SUSPENDONLY", "PERCENT_DOWNTIME", "PERCENT_MIXEDTIME", "PERCENT_OFFONLYTIME", "PERCENT_OFFTIME", "PERCENT_SUSPENDONLYTIME",
+          "PERCENT_SUSPENDTIME", "PERCENT_UPTIME", "REGISTERED_TIME", "SEMAOFF_TIME"];
 
-        Categories = {};
-        Categories["PRODUCTFAMILY"] = ["Laptop", "Servers", "Notebooks", "Mobile"];
-        Categories["HOSTPLATFORM"] = ["Laptop", "Servers", "Notebooks", "Mobile"];
+        var selections = {};
 
         $(document).ready(function () {
 
@@ -50,7 +48,11 @@
                     options[param].forEach(function (opt2, j) {
                         selectorDiv.find('select').append($('<option></option>').attr('value', opt2).text(opt2));
                     })
+                } else {
+                    selectorDiv.css("overflow-y","scroll");
                 }
+
+
 
             });
 
@@ -61,23 +63,45 @@
 
                 if (($(this).attr("name") == "Analysis")) {
                     var selectedAnalysis = $(this).find(":selected").text();
-                    Analyis_Parameters[selectedAnalysis].forEach(function (p, i) {
+                    selections["selectedAnalysis"] = selectedAnalysis;
+
+                    Analysis_Parameters[selectedAnalysis].forEach(function (p, i) {
 
                         //TO DO: first clear the current options
-                        $('[name=Analyis_Parameters]').append('<option value=' + p + '>' + p + '</option>');
+                        $('[name=Analysis_Parameters]').append('<option value=' + p + '>' + p + '</option>');
                     });
+
+                    $.getJSON('/Plot/options', { analysis: selectedAnalysis}, function (dates) {
+                        dates.forEach(function (opt2, j) {
+                            var date_stamp = new Date(opt2 * 1000);
+
+
+                            //TO DO: first clear the current options
+                            $('select[name=Date]').append($('<option></option>').attr('value', opt2).text(date_stamp.toLocaleDateString()));
+                        })
+                    });
+
+
                 } else if (($(this).attr("name") == "Classification")) {
                     var selectedClassification = $(this).find(":selected").text();
-                    Categories[selectedClassification].forEach(function (p, i) {
-                        var checkItem = $('<input type="checkbox" name="plot_class[]" value="' + p + '">')
-                            .change(function () {
-                                if ($('input:checkbox:checked').length > 3) {
-                                    $(this).attr("checked", false);
-                                    alert('Cannot check more than 3 items.');
-                                }
-                            });
+                    selections["selectedClassification"] = selectedClassification;
 
-                        $('#Classes.param_div div').append(checkItem).append(p + '<br>');
+                } else if (($(this).attr("name") == "Date")) {
+
+                    $.getJSON('/Plot/options', { analysis: selections["selectedAnalysis"], param: selections["selectedClassification"], time: $(this).val() }, function (classes) {
+
+                        classes.forEach(function (p, i) {
+                            var checkItem = $('<input type="checkbox" name="series" value="' + p + '">')
+                                .change(function () {
+                                    if ($('input:checkbox:checked').length > 3) {
+                                        $(this).attr("checked", false);
+                                        alert('Cannot check more than 3 items.');
+                                    }
+                                });
+
+                            $('#Classes.param_div div').append(checkItem).append(p + '<br>');
+                        });
+
                     });
                 }
 
@@ -102,7 +126,7 @@
 </head>
 <body style="margin: 0px; background-color: MediumPurple;">
 
-    <form method="post" action="/plot_selected">
+    <form method="post" action="/Plot/Test">
         <div id="inputs"></div>
         <input id="plotButton" class="button" type="submit" value="Plot data">
     </form>

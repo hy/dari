@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Untitled Page</title>
+    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="dataset_colors.css">
+    <link href='http://fonts.googleapis.com/css?family=Days+One' rel='stylesheet' type='text/css'>
+    <script>
+
+        var buttons = {};
+        buttons['Live Per-User Data']="/Plot/Line";
+        buttons['Pre-processed Summary Reports']="/public/plot_selector.htm";
+        buttons['Ad-Hoc Queries']="/public/plot_selector.htm";
+
+        $(document).ready(function () {
+
+            for (var button in buttons) {
+                $('<button class="menu">' + button + '</button>').click(function () {
+                    window.location.href = buttons[$(this).text()];
+                }).appendTo('body');
+            }
+
+            /*
+            $('<button>Live Per-User Data</button>').click(function () { 
+            window.location.href = "/Plot/Line"; }).appendTo('body');
+            $('body').append('<br>');
+            $('<button>Pre-processed Summary Reports</button>').click(function () {
+            window.location.href = "/public/plot_selector.htm";
+            }).appendTo('body');
+            $('body').append('<br>');
+            $('body').append('<button>Ad-Hoc Queries</button>').click(function () { });
+            */
+        });
+    </script>
+
+    <style>
+        button.menu 
+        {
+            width: 400px;
+            height: 100px;
+            padding: 25px;
+            display: block;
+            }
+        
+    </style>
+</head>
+<body>
+
+<!--<button>Live Per-User Data</button> <br />
+<button>Pre-processed Summary Reports</button> <br />
+<button>Ad-Hoc Queries</button> <br />
+-->
+
+<small>Version 1.005</small>
+</body>
+</html>

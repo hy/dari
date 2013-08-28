@@ -1,0 +1,44 @@
+﻿.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.other 
+{
+    stroke: purple;
+}
+
+.series1 
+{
+    stroke: purple;
+}
+.series2
+{
+    stroke: green;
+}
+
+#loading_gif
+{
+    position: fixed;
+top:500px;
+left:300px;
+display: none;
+}
+
+text.datum_info 
+{
+    /*visibility: hidden;*/
+    display: none;
+}

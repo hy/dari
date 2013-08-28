@@ -49,7 +49,9 @@
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -57,8 +59,12 @@
     <Reference Include="System.Web.Extensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.Abstractions">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Routing">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
@@ -66,20 +72,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\byUserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\jsonAPIController.cs" />
     <Compile Include="Controllers\PlotController.cs" />
+    <Compile Include="Controllers\SaveQueryFilterAttribute .cs" />
+    <Compile Include="Controllers\SummaryController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\JSONService.cs" />
+    <Compile Include="Models\SEMAService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\jquery.jscrollpane.css" />
+    <Content Include="Content\Plots.css" />
     <Content Include="Global.asax" />
     <Content Include="public\box.js" />
     <Content Include="public\box_plot.html" />
-    <Content Include="public\choose_data.htm" />
     <Content Include="public\dataset_colors.css" />
+    <Content Include="public\down_arrow_brown.jpg" />
     <Content Include="public\down_arrow_select.jpg" />
     <Content Include="public\graph0.htm" />
     <Content Include="public\graph1.htm" />
@@ -87,13 +101,28 @@
     <Content Include="public\graph_hist.htm" />
     <Content Include="public\histogram-chart.js" />
     <Content Include="public\histogram-chart2.js" />
+    <Content Include="public\images\ajax-loader.gif" />
+    <Content Include="public\images\small_ajax.gif" />
     <Content Include="public\images\symbols_2012.png" />
+    <Content Include="public\menu.htm" />
+    <Content Include="public\plot_selector.htm" />
     <Content Include="public\process_data.py" />
     <Content Include="public\sema_interface.html" />
     <Content Include="public\try.gif" />
+    <Content Include="Scripts\jquery.jscrollpane.min.js" />
+    <Content Include="Scripts\jquery.mousewheel.js" />
+    <Content Include="Views\byUser\HostInfo.ascx" />
+    <Content Include="Views\byUser\searchForHosts.ascx" />
+    <Content Include="Views\Home\Home.ascx" />
     <Content Include="Views\Plot\Blank.ascx" />
+    <Content Include="Views\Plot\LineGraph.ascx" />
     <Content Include="Views\Plot\Plot.aspx" />
-    <Content Include="Web.config" />
+    <Content Include="Views\summary\Plotter.aspx" />
+    <Content Include="Views\summary\Plotting.ascx" />
+    <Content Include="Views\summary\summaryUI.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -156,7 +185,7 @@
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
+          <NTLMAuthentication>True</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
           </CustomServerUrl>
