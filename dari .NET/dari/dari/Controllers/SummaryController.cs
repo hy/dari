@@ -14,6 +14,29 @@ namespace dari.Controllers
         // GET: /Summary/
         JSONService jsonService = new JSONService();
 
+        private void saveQuery(string newUrlLabel, string newURL)
+        {
+            string label;
+            string url;
+            for (int i = 0; i < 10; i++)
+            {
+                label = "";
+                url = "";
+
+                if (Request.Cookies["label" + i] != null)
+                    label = Request.Cookies["label" + i].Value;
+                if (Request.Cookies["url" + i] != null)
+                    url = Request.Cookies["url" + i].Value;
+
+                Response.Cookies.Add(new HttpCookie("url" + (i + 1), url));
+                Response.Cookies.Add(new HttpCookie("label" + (i + 1), label));
+            }
+
+
+            Response.Cookies.Add(new HttpCookie("url0", newURL));
+            Response.Cookies.Add(new HttpCookie("label0", newUrlLabel));
+        }
+
         public ActionResult Index()
         {
             return View("SummaryUI");
@@ -45,9 +68,10 @@ namespace dari.Controllers
         }
 
         [HttpPost]
-        //[SaveQueryFilter(newUrlLabel = "SEMA :: User History >> ")]
+        [SaveQueryFilter(newUrlLabel = "SEMA :: User History >> ")]
         public ActionResult plotData(string source, string analysis, string os, string classification, string Date, string Analysis_Parameters, string[] series)
         {
+            //saveQuery("SEMA :: Summary >> " + analysis + " >> " + Date + " >> {" + string.Join(",", series) + "}", "Plot/SummaryPlot/?" + Request.Form.ToString());
             return executePlotData(source,analysis,os,classification,Date,Analysis_Parameters,series);
         }
 
@@ -101,5 +125,7 @@ namespace dari.Controllers
 
             return Json(results, JsonRequestBehavior.AllowGet);
         }
+
+
     }
 }

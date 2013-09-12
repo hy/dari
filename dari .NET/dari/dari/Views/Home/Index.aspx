@@ -8,6 +8,12 @@
    
    <style>
        
+       #main
+    {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+    }
+       
        #main > div {
         padding: 50px;
         }
@@ -24,12 +30,28 @@
            width: 45%;
        }
        
-       #row2 .button 
-       {
-            width: 45%;
-            text-align: center;
-            font-size: 25px;
-       }
+       #row2 {
+        height: 200px;
+        position: relative;
+        }
+       
+           #row2 .button 
+           {
+                width: 27%;
+                text-align: center;
+                font-size: 25px;
+                height: 200px;
+                position: absolute;
+                top: 0px;
+                opacity: 0.8;
+           }
+       
+           #row2 .button:hover 
+           {
+               background-color: Gray;
+               color: White;
+           }
+       
        
              #title{
 
@@ -81,13 +103,26 @@ height: 300px;
            $('.scroll-pane').jScrollPane();
        });
 
+       $(document).ready(function () {
+           var button_colors = ["rgb(165,208,40)", "rgb(245,192,64)", "rgb(49,182,253)"];
+           var left_positions = ["0px", "33%", "66%"];
+           $("#row2 .button").each(function (idx, el) {
+               var button_color = button_colors[idx];
+               var left_position = left_positions[idx];
+               $(this).css('background-color', button_color);
+               $(this).css('left', left_position);
+           });
+
+       });
+
    </script>
 
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <div id="row1" class="row">
-         <div id="title" class="box_content">
+    <h2>Data Analysis and Reporting Interface</h2>
+<%--         <div id="title" class="box_content">
             <span>D</span>ata <br />
             <span>A</span>nalysis & <br />
             <span>R</span>eporting <br />
@@ -109,11 +144,12 @@ You also can create your own custom action filters. For example, you might want 
 In this tutorial, you learn how to build an action filter from the ground up. We create a Log action filter that logs different stages of the processing of an action to the Visual Studio Output window.
                 </p>
                </div>
-         </div>
+         </div>--%>
     </div>
     <div id="row2" class="row">
-        <a class="button" style="" href="/Summary">Aggregate Reports</a>
-        <a class="button" style="float: right;" href="/byUser">History by Host</a>
+        <a class="button" style="" href="/Summary">Monthly Reports</a>
+        <a class="button" href="/byUser">User Histories</a>
+        <a class="button" href="/Advanced">Advanced Analysis</a>
     </div>
     <div id="row3" class="row">
         <h1>Recent Plots</h1>

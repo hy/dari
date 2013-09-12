@@ -16,6 +16,184 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
 
+
+<style>
+    
+
+.bars rect {
+/*  fill: #D3BCEB; */
+  stroke: white;
+    fill-opacity:0.65;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+ /* stroke: purple; */
+  stroke-width: 1.5px;
+}
+
+.moving 
+{
+    /*stroke: orange;*/
+}
+
+.datum_info
+{
+    /*fill: Gray;*/
+    font: 300 40px Helvetica Neue;
+}
+
+.shaded 
+{
+   /* fill: steelblue; */
+    fill-opacity:0.5;
+}
+
+
+
+.box {
+  font: 10px sans-serif;
+}
+
+.box line,
+.box rect,
+.box circle {
+  /*fill: #D3BCEB;*/
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.box .center {
+  stroke-dasharray: 3,3;
+}
+
+.box .outlier {
+  fill: none;
+  stroke: #ccc;
+}
+
+
+
+
+
+body{
+    background: rgb(240, 240, 240);
+}
+
+#main
+{
+    /* display: none; */
+}
+
+    #raw div
+    {
+        display: inline-block;
+        vertical-align: top;
+    }
+    
+    .window
+    {
+        padding: 30px;
+        overflow-y: auto;
+        width: 80%;
+    }
+
+.chart_type 
+{
+    height: 500px;
+}
+
+    .chart_type svg.hist
+    {
+        height: 500px;
+        width: 960px;
+    }
+
+
+#plot_content
+{
+    width: 90%;
+background: none;
+margin: 50px auto;
+}
+
+#tabs
+{
+border: none;
+width: 100%;
+background: none;
+}
+    #tabs .ui-widget-header
+    {
+        background: none;
+        border: none;
+    }
+
+    #tabs .ui-tabs-panel
+    {
+        border: 1px solid #aaaaaa;
+        background: White;
+        border-color: rgb(120,152,26);
+    
+    }
+    #tabs .ui-state-default
+    {
+        background: rgb(165,208,40);
+        float: right;
+        border-color: rgb(120,152,26);
+    }
+        #tabs .ui-state-default:hover
+        {
+            background: Gray;
+        }
+        #tabs .ui-state-default a
+        {
+            color: White;
+        }
+    #tabs li.ui-tabs-active
+    {
+        background: White;
+        }
+        #tabs li.ui-tabs-active:hover
+        {
+            background: White;
+            }
+        #tabs li.ui-tabs-active a
+        {
+            color: rgb(165,208,40);
+        }
+
+
+
+.color_option
+{
+    display: inline-block;
+    width: 20px;
+    height: 15px;
+    border: White 2px solid;
+    margin: 2px;
+    cursor: pointer;
+}
+
+
+</style>
+
+<script src="http://mbostock.github.com/d3/d3.v2.js?2.8.0"></script>
+<script src="../../public/histogram-chart2.js"></script>
+<script src="../../public/box.js"></script>
+
+
+
 <script>
 
     //TO DO: validate form before submitting

@@ -43,9 +43,18 @@ namespace dari.Controllers
                 Response.Cookies.Add(new HttpCookie("label" + (i + 1), label));
             }
 
-
-            Response.Cookies.Add(new HttpCookie("url0", filterContext.ParentActionViewContext.ViewData["newURL"].ToString()));
-            Response.Cookies.Add(new HttpCookie("label0", filterContext.ParentActionViewContext.ViewData["newLabel"].ToString()));
+            string[] tokens = Request.RawUrl.Split(new char[] { '/' });
+            string source = tokens.Last();
+            string type = tokens[1];
+            string newLabel = source + " :: " + type + " >> ";
+            string newUrl ="";
+            if (type.Equals("Summary"))
+            {
+                newLabel += (Request.Params["analysis"] + " >> " + Request.Params["date"] + " >> ");
+                newUrl = type + "/plotDataSaved/" + source + "?" + Request.Form.ToString();
+            }
+            Response.Cookies.Add(new HttpCookie("url0", newUrl));
+            Response.Cookies.Add(new HttpCookie("label0", newLabel));
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿    body 
     {
         background: rgb(49,182,253);
+        background: White;
         margin: 0px;
         font-family: Calibri;
         padding: 0px;
@@ -37,7 +38,8 @@
         /* width: 200px; */
         height: 34px;
         overflow: hidden;
-        background: url(/public/down_arrow_brown.jpg) no-repeat right rgb(255,255,153);
+        /*background: url(/public/down_arrow_brown.jpg) no-repeat right rgb(255,255,153);*/
+        background: rgb(255,255,153);
         border: 2px solid rgb(244,189,58);
         border-radius: 5px;
         display: inline-block;
@@ -58,6 +60,11 @@
             height: 34px;
             -webkit-appearance: none;
             color: rgb(147,106,8);
+        }
+   
+        .styled-select span
+        {
+            display: inline-block;
         }
   
     #top_bar 
@@ -128,6 +135,10 @@ h1
         margin: 0px;
 }
 
+    h2 
+    {
+        color: Gray;
+    }
 
     
     .instructions
@@ -308,4 +319,11 @@ background: rgb(255,255,153);
 
 .jspTrack {
 background: rgb(244,189,58);
+}
+
+.grey_box 
+{
+    background: rgb(244,244,244);
+    border-radius: 5px;
+    padding: 15px;
 }

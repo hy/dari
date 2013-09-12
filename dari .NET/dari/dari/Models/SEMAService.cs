@@ -260,6 +260,8 @@ and [HostLifetime_LINtable].HostIndex = [CPUBasedPrimaryIndexMap_LINtable].HostI
         private Object metaQueries(string table, string field, string condition = "1=1", string distinct = "distinct ")
         {
 
+            if (table.StartsWith("turbo")) return getTurboData();
+
             SqlConnection myConnection = new SqlConnection(connectionString);
             myConnection.Open();
 
@@ -396,6 +398,11 @@ and [HostLifetime_LINtable].HostIndex = [CPUBasedPrimaryIndexMap_LINtable].HostI
                         condition = "AnalysisTime=" + time;
                         fieldName = variable;
                         break;
+                    case "turbo":
+                        tableName = "turbo";
+                        condition = "";
+                        fieldName = "";
+                        break;
                     default:
                         return null; //put error code
                 }
@@ -465,6 +472,152 @@ and [HostLifetime_LINtable].HostIndex = [CPUBasedPrimaryIndexMap_LINtable].HostI
 
             return return_data;
 
+        }
+
+
+
+
+        /*advanced analysis */
+        private Object getTurboData(){
+
+            var query = @"use emma_v5_db
+
+SELECT  A.HostIndex,MAX(B.TotalUptime * 100.0/B.TotalRegistered) as S0_PerDay,AVG(A.PercentC0PerS0) as AvgC0_PerCore ,MAX(A.TFM_PerC0) as MaxP0_PerC0,
+       
+        MAX(A.TFM_PerC0) * MAX(B.TotalUptime * 100.0/B.TotalRegistered)  * (MAX(A.PercentC0PerS0) + 0.5 * MIN(A.PercentC0PerS0))/100  as P0_Per_Day,
+        
+  
+AVG(A.TFM_PerC0 * A.PercentC0PerS0 ) as AvgP0_PerS0
+, (MAX(A.PercentC0PerS0) + 0.5 * MIN(A.PercentC0PerS0)) as Package_C0
+
+
+    from Sum_CPUCPstats_PerPhyCore_BasicStats_WINtable as A, Summary_DowntimePerCPUPrimaryHostIndex_WINtable as B,
+CPUPrimaryCPUInfoProcessed_WINtable as C, CPUBasedPrimaryIndexMap_WINtable as D
+where A.HostIndex=B.HostIndex and B.TotalRegistered > 0 and C.CPUPrimaryHostIndex=B.HostIndex and C.CPUNum=1 and C.Product='Ivy Bridge' and A.TotalCollectionHours > 150
+and D.CPUPrimaryHostIndex=C.CPUPrimaryHostIndex and D.HostPlatform='LAPTOP' and D.IsPrimary=1  and C.NumCores=2 --and A.CPUNum=2
+group by A.HostIndex order by A.HostIndex
+";
+
+
+            SqlConnection myConnection = new SqlConnection(connectionString);
+            myConnection.Open();
+
+            SqlCommand myCommand = new SqlCommand(query, myConnection);
+            SqlDataReader myReader = null;
+            myReader = myCommand.ExecuteReader();
+
+            List<object> data = new List<object>();
+
+            while (myReader.Read())
+            {
+                data.Add((object)myReader["P0_Per_Day"]);
+            }
+            myConnection.Close();
+
+            return data;
+        }
+
+        public class filterParams
+        {
+
+            public List<object> filters { get; set; }
+            public Dictionary<string, string> filterValues { get; set; }
+        }
+        public Object correlation(Dictionary<string, object> parameters)
+        {
+
+            var columns = new Dictionary<string, string>
+                {
+                    { "Product", "C.Product" }, 
+                    { "HostPlatform", "D.HostPlatform" },
+                    { "NumCores", "C.NumCores" }
+                };
+
+            var conditions = "";
+            foreach(var filter in (string[]) parameters["filters"]){
+                conditions += string.Format(" and {0}='{1}'", columns[filter], parameters[filter]);
+            }
+
+
+            var query = string.Format(@"use emma_v5_db
+
+SELECT  A.HostIndex,MAX(B.TotalUptime * 100.0/B.TotalRegistered) as S0_PerDay,AVG(A.PercentC0PerS0) as AvgC0_PerCore ,MAX(A.TFM_PerC0) as MaxP0_PerC0,
+       
+        MAX(A.TFM_PerC0) * MAX(B.TotalUptime * 100.0/B.TotalRegistered)  * (MAX(A.PercentC0PerS0) + 0.5 * MIN(A.PercentC0PerS0))/100  as P0_Per_Day,
+        
+  
+AVG(A.TFM_PerC0 * A.PercentC0PerS0 ) as AvgP0_PerS0
+, (MAX(A.PercentC0PerS0) + 0.5 * MIN(A.PercentC0PerS0)) as Package_C0
+
+
+    from Sum_CPUCPstats_PerPhyCore_BasicStats_WINtable as A, Summary_DowntimePerCPUPrimaryHostIndex_WINtable as B,
+CPUPrimaryCPUInfoProcessed_WINtable as C, CPUBasedPrimaryIndexMap_WINtable as D
+where A.HostIndex=B.HostIndex and B.TotalRegistered > 0 and C.CPUPrimaryHostIndex=B.HostIndex and C.CPUNum=1 and A.TotalCollectionHours > 150
+and D.CPUPrimaryHostIndex=C.CPUPrimaryHostIndex and D.IsPrimary=1 {0}
+group by A.HostIndex order by A.HostIndex
+", conditions);
+            string x = (string)parameters["x"]; //AvgC0_PerCore
+            string y = (string)parameters["y"]; //AvgP0_PerS0
+
+            SqlConnection myConnection = new SqlConnection(connectionString);
+            myConnection.Open();
+
+            SqlCommand myCommand = new SqlCommand(query, myConnection);
+            SqlDataReader myReader = null;
+            myReader = myCommand.ExecuteReader();
+
+            List<object> data = new List<object>();
+            object obj;
+
+            while (myReader.Read())
+            {
+                obj = new
+                {
+                    x = myReader[x],
+                    y = myReader[y],
+                    info = myReader["HostIndex"]
+                };
+                data.Add(obj);
+            }
+            myConnection.Close();
+
+            return data;
+        }
+
+        public Object getFilterOptions() {
+
+            SqlConnection myConnection = new SqlConnection(connectionString);
+            myConnection.Open();
+
+            Dictionary<string, List<object>> filters = new Dictionary<string, List<object>>();
+            filters["Product"] = new List<object>();
+            filters["HostPlatform"] = new List<object>();
+            filters["NumCores"] = new List<object>();
+
+            foreach (KeyValuePair<string, List<object>> pair in filters)
+            {
+                string query = String.Format(@"SELECT DISTINCT {0}
+from CPUPrimaryCPUInfoProcessed_WINtable, CPUBasedPrimaryIndexMap_WINtable
+where CPUBasedPrimaryIndexMap_WINtable.HostIndex = CPUPrimaryCPUInfoProcessed_WINtable.CPUPrimaryHostIndex",pair.Key);
+
+                query += (" UNION " + query.Replace("_LIN", "_WIN"));
+
+                SqlCommand myCommand = new SqlCommand(query, myConnection);
+                SqlDataReader myReader = null;
+                myReader = myCommand.ExecuteReader();
+
+                //List<object> data = new List<object>();
+
+                while (myReader.Read())
+                {
+                    pair.Value.Add(myReader[0]);
+                }
+                myReader.Close();
+
+            }
+            myConnection.Close();
+
+            return filters;
         }
     }
 }

@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdvancedController.cs" />
     <Compile Include="Controllers\byUserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\jsonAPIController.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\images\filter_loading.gif" />
     <Content Include="Content\jquery.jscrollpane.css" />
     <Content Include="Content\Plots.css" />
     <Content Include="Global.asax" />
@@ -100,7 +102,6 @@
     <Content Include="public\graph2.htm" />
     <Content Include="public\graph_hist.htm" />
     <Content Include="public\histogram-chart.js" />
-    <Content Include="public\histogram-chart2.js" />
     <Content Include="public\images\ajax-loader.gif" />
     <Content Include="public\images\small_ajax.gif" />
     <Content Include="public\images\symbols_2012.png" />
@@ -111,12 +112,15 @@
     <Content Include="public\try.gif" />
     <Content Include="Scripts\jquery.jscrollpane.min.js" />
     <Content Include="Scripts\jquery.mousewheel.js" />
+    <Content Include="Scripts\mwheelIntent.js" />
+    <Content Include="Scripts\plots\correlation_plot_d3.js" />
     <Content Include="Views\byUser\HostInfo.ascx" />
     <Content Include="Views\byUser\searchForHosts.ascx" />
     <Content Include="Views\Home\Home.ascx" />
     <Content Include="Views\Plot\Blank.ascx" />
     <Content Include="Views\Plot\LineGraph.ascx" />
     <Content Include="Views\Plot\Plot.aspx" />
+    <Content Include="Views\Advanced\correlation.aspx" />
     <Content Include="Views\summary\Plotter.aspx" />
     <Content Include="Views\summary\Plotting.ascx" />
     <Content Include="Views\summary\summaryUI.aspx" />

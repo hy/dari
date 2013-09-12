@@ -38,6 +38,25 @@
             });
 
         }
+
+        $.fn.picker = function () {
+            this.wrap("<div class='styled-select' />");
+            this.parent().append("<span class='ui-button-icon-secondary ui-icon ui-icon-carat-1-s' />");
+            this.parent().find("span").click(function () {
+                $(this).siblings("select").trigger('focus');
+            });
+            return this;
+        };
+
+
+        if(window.$)
+            window.$.getDariJson = getDariJson;
+
+       
+        $(document).ready(function () {
+            
+        })
+    
     </script>
 
     <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
@@ -46,8 +65,10 @@
 <body>
     <div id="top_bar">
         <div>
+            <a href="/" style="color: White" >DARI</a> |
             <span>
-                Welcome <strong><%= HttpContext.Current.User.Identity.Name %></strong>! You are currently connected to
+                <%--Welcome <strong><%= HttpContext.Current.User.Identity.Name %></strong>! You are currently connected to--%>
+                Current Data Source:
             </span>
 
             <div class="styled-select"> 

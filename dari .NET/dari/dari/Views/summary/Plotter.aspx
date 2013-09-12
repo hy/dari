@@ -50,7 +50,7 @@
         <%=series_name %> <div class="color_option"></div><div class="color_option"></div><div class="color_option"></div>
             <br />
         <% } %>--%>
-            <button id="Button1">Hide Overlay</button><button id="Button2">Hide Bars</button><button id="Button3">Hide Lines</button> <br />
+            <button id="toggleOverlay">Hide Overlay</button><button id="toggleHist">Hide Bars</button><button id="toggleLines">Hide Lines</button> <br />
 
     </div>
 
@@ -129,7 +129,7 @@
 
 
 body{
-    background: rgb(255,255,153);
+    background: rgb(240, 240, 240);
 }
 
 #main
@@ -456,7 +456,11 @@ background: none;
         $('.color_option').click(function () {
             var selectedColor = $(this).css('background-color');
             var series_idx = $(this).data('series_idx');
-            $('.fill_color'+series_idx).attr('fill', selectedColor);
+            //$('.fill_color'+series_idx).attr('fill', selectedColor);
+            d3.selectAll('.fill_color'+series_idx).transition().duration(function(d, i) { 
+                return i * 10; })
+                .attr("fill", selectedColor)
+
             $('.series'+series_idx).css('border-width','');
             $(this).css('border-width','4px');
         });

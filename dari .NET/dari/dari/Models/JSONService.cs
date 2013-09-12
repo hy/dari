@@ -61,6 +61,14 @@ namespace dari.Models
                     results = semaService.getPlottingData(parameters);
                     break;
 
+                /* for advanced analysis*/
+                case "correlation":
+                    results = semaService.correlation(parameters);
+                    break;
+                case "getFilterOptions":
+                    results = semaService.getFilterOptions();
+                    break;
+
                 default:
                     results = null;
                     break;

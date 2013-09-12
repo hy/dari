@@ -41,7 +41,7 @@ namespace dari.Controllers
                     url = Request.Cookies["url" + i].Value;
 
                 //recentPlotsHTML += ("<a  href='/Plot/SummaryPlot/?" + url + "'>" + label + "</a><br />");
-                recentPlotsHTML += ("<a  href='/" + url + "'>" + label + "</a><br />");
+                recentPlotsHTML += ("<a  href='" + url + "'>" + label + "</a><br />");
 
             }
             ViewData["recentPlots"] = recentPlotsHTML;
