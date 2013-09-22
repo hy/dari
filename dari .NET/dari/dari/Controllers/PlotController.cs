@@ -352,7 +352,7 @@ namespace dari.Controllers
 
             myConnection.Open();
 
-            var query = "SELECT * FROM [LINemma_v5_db_MsrOtherHistory].[dbo].[MsrOtherHistory_" + hostName + "_LINtable]   where (Timestamp > " + start + ") and (Timestamp < " + end + ") and (MSRname='IA32_THERM_STATUS')";
+            var query = "SELECT * FROM [WINemma_v5_db_MsrOtherHistory].[dbo].[MsrOtherHistory_" + hostName + "_WINtable]   where (Timestamp > " + start + ") and (Timestamp < " + end + ") and (MSRname='IA32_THERM_STATUS')";
 
             query += " and (";
             foreach (string cpuNum in cpus)
@@ -360,6 +360,10 @@ namespace dari.Controllers
                 query += "(CPUNum=" + cpuNum + ") or ";
             }
             query += "(1=0) ) order by Timestamp";
+
+            query += (" END ELSE " + query.Replace("_LIN", "_WIN"));
+
+            query = ("IF  NOT EXISTS (SELECT * FROM LINemma_v5_db_MsrOtherHistory.sys.tables WHERE name = 'MsrOtherHistory_" + hostName + "_LINtable') BEGIN " + query);
 
             SqlCommand myCommand = new SqlCommand(query, myConnection);
             SqlDataReader myReader = null;

@@ -75,8 +75,10 @@
     <Compile Include="Controllers\AdvancedController.cs" />
     <Compile Include="Controllers\byUserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\InitializeFilterAttribute.cs" />
     <Compile Include="Controllers\jsonAPIController.cs" />
     <Compile Include="Controllers\PlotController.cs" />
+    <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\SaveQueryFilterAttribute .cs" />
     <Compile Include="Controllers\SummaryController.cs" />
     <Compile Include="Global.asax.cs">
@@ -88,7 +90,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\images\bg-noise.jpg" />
+    <Content Include="Content\images\calendar_icon.png" />
+    <Content Include="Content\images\computer_icon.png" />
     <Content Include="Content\images\filter_loading.gif" />
+    <Content Include="Content\images\graph_icon.png" />
     <Content Include="Content\jquery.jscrollpane.css" />
     <Content Include="Content\Plots.css" />
     <Content Include="Global.asax" />
@@ -113,14 +119,17 @@
     <Content Include="Scripts\jquery.jscrollpane.min.js" />
     <Content Include="Scripts\jquery.mousewheel.js" />
     <Content Include="Scripts\mwheelIntent.js" />
+    <Content Include="Scripts\plots\box.js" />
     <Content Include="Scripts\plots\correlation_plot_d3.js" />
     <Content Include="Views\byUser\HostInfo.ascx" />
     <Content Include="Views\byUser\searchForHosts.ascx" />
     <Content Include="Views\Home\Home.ascx" />
+    <Content Include="Views\Reports\Index.aspx" />
     <Content Include="Views\Plot\Blank.ascx" />
     <Content Include="Views\Plot\LineGraph.ascx" />
     <Content Include="Views\Plot\Plot.aspx" />
     <Content Include="Views\Advanced\correlation.aspx" />
+    <Content Include="Views\Reports\Output.aspx" />
     <Content Include="Views\summary\Plotter.aspx" />
     <Content Include="Views\summary\Plotting.ascx" />
     <Content Include="Views\summary\summaryUI.aspx" />

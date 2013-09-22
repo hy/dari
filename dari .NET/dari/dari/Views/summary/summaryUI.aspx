@@ -320,7 +320,7 @@ background: none;
                                         }
                                     });
 
-                            $('#Classes').next('div').append(checkItem).append(p + '<br>');
+                                    $('#Classes').next('div').append(checkItem).append(p + '<br>');
                         });
 
                     });

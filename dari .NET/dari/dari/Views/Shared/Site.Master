@@ -17,24 +17,24 @@
   <script src="../../Scripts/jquery.mousewheel.js"></script>
 
     <script>
+
+        var data_source = '<%= ViewData["initial_data_source"] %>';
+
         //define ajax wrapper that automatically sends data source
         function getDariJson(controller, action, data, callback) {
-        /*
-            var args = arguments[0] || {}; // It's your object of arguments
-            var controller = args.controller;
-            var action = args.action;
-            var data = args.data;
-            var callback = args.callback;
-            */
-            var source = $("#source_selector").val();
-            var url = [, controller, action, source].join('/');
+
+            //var source = $("#source_selector").val();
+            var url = [, controller, action, data_source].join('/');
 
             $.ajax({
                 url: url,
                 dataType: "json",
                 data: data,
                 traditional: true,
-                success: callback
+                success: callback,
+                error: function (x, status, error_details) {
+                    alert(error_details);
+                }
             });
 
         }
@@ -52,9 +52,28 @@
         if(window.$)
             window.$.getDariJson = getDariJson;
 
-       
+        function changeDataSource(source_name) {
+            data_source = source_name;
+            $('#displayed_source_name').text(source_name);
+        }
+        $(function () {
+            $("#data_source_menu").menu();
+        });
+
         $(document).ready(function () {
-            
+            $('#data_source_menu').hide();
+
+            changeDataSource('<%= ViewData["initial_data_source"] %>');
+
+            $('#displayed_source_name').click(function () {
+                $('#data_source_menu').show();
+            });
+
+            $("#data_source_menu a").click(function () {
+                $('#data_source_menu').hide();
+                changeDataSource($(this).text());
+                $.post("/Home/saveSelectedSource", { source_name: $(this).text() });
+            });
         })
     
     </script>
@@ -65,17 +84,22 @@
 <body>
     <div id="top_bar">
         <div>
-            <a href="/" style="color: White" >DARI</a> |
-            <span>
-                <%--Welcome <strong><%= HttpContext.Current.User.Identity.Name %></strong>! You are currently connected to--%>
-                Current Data Source:
-            </span>
+            <span class="left" id="home_link" ><a href="/">DARI</a></span>
+            <ul id="navigation_links">
+            <li class="<%= ViewData["monthly_reports_link_class"] %>"  ><a href="/Summary">Monthly Reports</a></li>
+            <li class="<%= ViewData["user_history_link_class"] %>" ><a href="/byUser">User History</a></li>
+            <li class="<%= ViewData["analytics_link_class"] %>"><a  href="/Advanced">Analytics</a></li>
+            </ul>
 
-            <div class="styled-select"> 
-                <select id="source_selector">
-                    <option value="SEMA">SEMA</option>
-                    <option value="DCA">DCA</option>
-                </select>
+
+            <div id="source_selector"> 
+                <span class="left">Connected to:</span>
+                <span id="displayed_source_name">SEMA </span>
+                <ul id="data_source_menu">
+                  <li><a href="#">SEMA</a></li>
+                  <li><a href="#">DCA</a></li>
+                  <li><a href="#">SEMA2</a></li>
+                </ul>
             </div>
         </div>
     </div>

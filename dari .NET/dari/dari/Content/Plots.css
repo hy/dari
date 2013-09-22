@@ -1,44 +1,98 @@
 ﻿.axis path,
 .axis line {
   fill: none;
-  stroke: Gray;
+  stroke: #eee;
   shape-rendering: crispEdges;
 }
 
-.x.axis path {
-  /*display: none;*/
+.axis text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    fill: #999;
 }
+
+.horizontalGrid 
+{
+    fill: none;
+    shape-rendering: crispEdges;
+    stroke: #eee;
+    stroke-width: 1px
+}
+
+
+
+path.color1, path.color1
+{
+    stroke: rgb(244,189,58);
+}
+rect.color1
+{
+    fill: rgb(244,189,58);
+}
+
+
+rect {
+    stroke: white;
+    fill-opacity:0.65;
+    fill: #1db34f;
+}
+
+
+
+
+
+
+
+
+/*from original histograms */
+
+
+
 
 .line {
   fill: none;
-  stroke: steelblue;
+ /* stroke: purple; */
   stroke-width: 1.5px;
 }
 
-.other 
+.moving 
 {
-    stroke: purple;
+    /*stroke: orange;*/
 }
 
-.series1 
+.datum_info
 {
-    stroke: purple;
-}
-.series2
-{
-    stroke: green;
+    /*fill: Gray;*/
+    /*font: 300 40px Helvetica Neue;*/
 }
 
-#loading_gif
+.shaded 
 {
-    position: fixed;
-top:500px;
-left:300px;
-display: none;
+   /* fill: steelblue; */
+    fill-opacity:0.5;
 }
 
-text.datum_info 
-{
-    /*visibility: hidden;*/
-    display: none;
+
+
+.box {
+  font: 10px sans-serif;
 }
+
+
+.box line,
+.box rect,
+.box circle {
+  stroke-width: 1.5px;
+  stroke: Gray;
+}
+
+.box .center {
+  stroke-dasharray: 3,3;
+}
+
+.box .outlier {
+  fill: none;
+  stroke: #ccc;
+}
+
+

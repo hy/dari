@@ -10,6 +10,7 @@ namespace dari.Controllers
     //[Authorize(Users = @"AMR\naudegbu, AMR\rfkwasni, AMR\pspolasa, AMR\amrashid")]
     //[Authorize(Users = "naudegbu, rfkwasni, pspolasa, amrashid")]
     [Authorize()]
+    [InitializeFilterAttribute]
     public class byUserController : Controller
     {
         //
@@ -18,6 +19,7 @@ namespace dari.Controllers
 
         public ActionResult Index()
         {
+            ViewData["user_history_link_class"] = "current_section";
             return View("searchForHosts");
         }
 
@@ -59,13 +61,18 @@ namespace dari.Controllers
         }
 
 
-        public ActionResult HostInfo(string hostName, string lifetimeIdx, string start, string end, string[] cpus)
+        public ActionResult HostInfo(string hostName, string lifetimeIdx, string start, string end, string[] cpus, string lifetimeLabel, string os)
         {
+            ViewData["user_history_link_class"] = "current_section";
+
+
             ViewData["hostName"] = hostName;
             ViewData["lifetimeIdx"] = lifetimeIdx;
             ViewData["start"] = start;
             ViewData["end"] = end;
             ViewData["cpus"] = cpus;
+            ViewData["lifetimeLabel"] = lifetimeLabel;
+            ViewData["os"] = os;
             return View("HostInfo");
         }
     }

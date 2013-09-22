@@ -7,6 +7,7 @@ using System.Web.Mvc;
 namespace dari.Controllers
 {
     [HandleError]
+    [InitializeFilter]
     public class HomeController : Controller
     {
         //[Authorize(Roles = @"FM6SWWW062\DARI_Access")]
@@ -30,6 +31,7 @@ namespace dari.Controllers
             string label;
             string url;
             string recentPlotsHTML = "";
+            bool hasNoRecentPlots = true; ;
             for (int i = 0; i < 10; i++)
             {
                 label = "";
@@ -40,10 +42,14 @@ namespace dari.Controllers
                 if (Request.Cookies["url" + i] != null)
                     url = Request.Cookies["url" + i].Value;
 
-                //recentPlotsHTML += ("<a  href='/Plot/SummaryPlot/?" + url + "'>" + label + "</a><br />");
-                recentPlotsHTML += ("<a  href='" + url + "'>" + label + "</a><br />");
-
+                if (url.Length > 0 && label.Length > 0)
+                {
+                    hasNoRecentPlots = false;
+                    recentPlotsHTML += ("<a  href='" + url + "'>" + label + "</a><br />");
+                }
             }
+            if (hasNoRecentPlots)
+                recentPlotsHTML = "You have no recent plots. Click the buttons above, to begin making custom plots for reporting and analysis";
             ViewData["recentPlots"] = recentPlotsHTML;
 
             return View();
@@ -55,6 +61,14 @@ namespace dari.Controllers
         public ActionResult About()
         {
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult saveSelectedSource(string source_name)
+        {
+
+            Response.Cookies.Add(new HttpCookie("last_source", source_name));
+            return new EmptyResult();
         }
 
 

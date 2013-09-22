@@ -69,6 +69,18 @@ namespace dari.Models
                     results = semaService.getFilterOptions();
                     break;
 
+
+                /* for monthly reporting*/
+                case "getAnalysisOptions":
+                    results = semaService.getAnalysisOptions(parameters);
+                    break;
+                case "getAnalysisParams":
+                    results = semaService.getAnalysisParams(parameters);
+                    break;
+                case "getData":
+                    results = semaService.getData(parameters);
+                    break;
+
                 default:
                     results = null;
                     break;

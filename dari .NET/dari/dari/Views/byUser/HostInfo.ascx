@@ -9,6 +9,7 @@
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 <script>
     var checkedCPUs = [];
+    var lifeTimes = {};
 
  function getInfo(hostname, callback) {
 
@@ -19,6 +20,7 @@
                 var Birthtime = new Date(lifetime.Birthtime * 1000);
                 var Deathtime = new Date(lifetime.Deathtime * 1000);
 
+                lifeTimes[lifetime.Birthtime] = {index: idx, death: lifetime.Deathtime};
                 
                 $('#panels').append("<h1>"+lifetime.timeIntervalLabel+"<span class='details'></span></h1>");
                 $('#panels').append("<div>"+lifetime.HostPlatform+" platform<div>");
@@ -128,7 +130,7 @@
         $.ajax({
 
             url: '/Plot/lineData',
-            data: { hostName: '<%= ViewData["hostName"] %>', cpus: checkedCPUs, start: startDate, end: endDate, lifetimeIdx: lifetimeIdx },
+            data: { hostName: '<%= ViewData["hostName"] %>', cpus: checkedCPUs, start: startDate, end: endDate, lifetimeIdx: lifetimeIdx, os: '<%= ViewData["os"] %>' },
             type: 'GET',
             dataType: 'json',
             traditional: true,
@@ -262,8 +264,16 @@
             getInfo(selectedHost, function (){
 
             var lifetimeIdx = '<%= ViewData["lifetimeIdx"] %>';
+            var lifetimeLabel = '<%= ViewData["lifetimeLabel"] %>';
             var start = '<%= ViewData["start"] %>';
             var end = '<%= ViewData["end"] %>';
+
+            if(lifeTimes[lifetimeLabel]){
+                lifetimeIdx = lifeTimes[lifetimeLabel].index.toString();
+                start = lifetimeLabel;
+                end = lifeTimes[lifetimeLabel].death;
+            }
+
             <% var serializer = new System.Web.Script.Serialization.JavaScriptSerializer(); %>
             checkedCPUs = <%= serializer.Serialize((string[]) ViewData["cpus"]) %>; 
 

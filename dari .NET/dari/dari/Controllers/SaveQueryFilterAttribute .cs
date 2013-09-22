@@ -43,15 +43,31 @@ namespace dari.Controllers
                 Response.Cookies.Add(new HttpCookie("label" + (i + 1), label));
             }
 
-            string[] tokens = Request.RawUrl.Split(new char[] { '/' });
+            //string[] tokens = Request.RawUrl.Split(new char[] { '/' });
+            string[] tokens = Request.Url.AbsolutePath.Split(new char[] { '/' });
             string source = tokens.Last();
             string type = tokens[1];
-            string newLabel = source + " :: " + type + " >> ";
+            string newLabel = source + " :: ";
             string newUrl ="";
             if (type.Equals("Summary"))
             {
-                newLabel += (Request.Params["analysis"] + " >> " + Request.Params["date"] + " >> ");
+                DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                string dateString = epoch.AddSeconds(Convert.ToInt32(Request.Params["date"])).ToLocalTime().ToString("MMMM d, yyyy");
+                newLabel += ("Monthly >> " + Request.Params["analysis"] + " >> " + dateString);
                 newUrl = type + "/plotDataSaved/" + source + "?" + Request.Form.ToString();
+            }
+            else if (type.Equals("Advanced"))
+            {
+                newLabel += "Analytics >> ";
+                string plot_type = Request.Params["plot_type"];
+                if (plot_type.Equals("histogram"))
+                    newLabel += (plot_type + " >> " + Request.Params["hist_var"] + " >> ");
+                else
+                    newLabel += (plot_type + " >> " + Request.Params["x"] + " vs " + Request.Params["y"]);
+
+                        
+               // newLabel += ("filtered by " + Request.Params["filters"]);
+                newUrl = type + Request.Url.Query + "&source=" + source + "&replot=true";
             }
             Response.Cookies.Add(new HttpCookie("url0", newUrl));
             Response.Cookies.Add(new HttpCookie("label0", newLabel));

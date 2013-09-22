@@ -8,6 +8,8 @@ using System.Web.Script.Serialization;
 
 namespace dari.Controllers
 {
+    [Authorize()]
+    [InitializeFilterAttribute]
     public class SummaryController : Controller
     {
         //
@@ -39,6 +41,7 @@ namespace dari.Controllers
 
         public ActionResult Index()
         {
+            ViewData["monthly_reports_link_class"] = "current_section";
             return View("SummaryUI");
         }
 

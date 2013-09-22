@@ -17,10 +17,23 @@
             <div id="filters_list"><span> Selected Filters: </span></div>
         </div>
 
+        <h2> Choose Plot Type </h2>
+        <div class="grey_box">
+        <div id="radio">
+            <input type="radio" id="radio1" name="plot_type" value="histogram"/><label for="radio1">Cumulative</label>
+            <input type="radio" id="radio2" name="plot_type" value="correlation" /><label for="radio2">Correlation</label>
+        </div>
+        </div>
+
         <h2> Choose Variables </h2>
         <div class="grey_box">
-            X axis: <select name="x_axis" id="x_axis"></select>
-            Y axis: <select name="y_axis" id="y_axis"></select>
+            <div class="variable_selectors_div" id="histogram_variable_selectors">
+                Histogram Variable: <select name="hist_var" id="hist_var"></select>
+            </div>
+            <div class="variable_selectors_div" id="correlation_variable_selectors">
+                X axis: <select name="x_axis" id="x_axis"></select>
+                Y axis: <select name="y_axis" id="y_axis"></select>
+            </div>
         </div>
         <button id="plot_button">Plot</button>
         <div id="ajax_loader">
@@ -28,7 +41,16 @@
         </div>
     </div>
 
-    <div id="plot_div"></div>
+     <a href="javascript:toggleQueryBox()">(View Query Text)</a>
+    <div id="query_box" class="grey_box">
+        <pre></pre>
+    </div>
+
+    <div id="plot_div">
+        <a>Download Data</a>
+    </div>
+
+   
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
@@ -63,7 +85,7 @@
         position: absolute;
         top: 0px;
         left: 0px;
-        width: 100%;
+        width: 110%;
         height: 100%;
         text-align: center;
         vertical-align: center;
@@ -74,7 +96,7 @@
     {
         position: absolute;
         top: 30%;
-    width: 100%;
+    width: 110%;
     margin: 0 auto;
     text-align: center;
     color: rgb(49,182,253);
@@ -105,8 +127,35 @@ border-radius: 5px;
         width: 100%;
 margin: 10px;
     }
+    
+    pre
+    {
+        font-size: 12px;
+white-space: pre-wrap;
+        }
+    
+    
+    
+    /*overriding default graphing styles*/
+    
+    line.moving, path.line
+    {
+        stroke: none;
+    }
+    
+    path.shaded 
+    {
+        fill: none;
+    }
+    
+    .fill_color0
+    {
+        fill: rgb(49,182,253);
+    }
+    
 </style>
 
+<script src="../../public/histogram-chart2.js"></script>
 <script>
 
     var filters;
@@ -135,12 +184,123 @@ margin: 10px;
 
     var color = ["", "steelblue", "#90CA77", "#E9B64D"];
 
-    function plotTemp(x_axis, y_axis) {
-        $('#loading_gif').show();
+    function plotCorrelation(data) {
 
-        //var formData = { x: "AvgC0_PerCore", y: "AvgP0_PerS0" };
-        //var formData = { x: "MaxP0_PerC0", y: "AvgC0_PerCore" };
-        var formData = { x: x_axis, y: y_axis };
+        $('svg').remove();
+
+        var svg = d3.select("#plot_div").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        x.domain(d3.extent(data, function (d) { return d.x; }));
+        y.domain(d3.extent(data, function (d) { return d.y; }));
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("y", -20)
+            .attr("x", width / 3)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text(x_axis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text(y_axis);
+
+
+        svg.selectAll(".data_point")
+                .data(data)
+            .enter().append("g")
+                .attr("class", "data_point");
+
+        svg.selectAll(".data_point")
+        .data(data)
+        .append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function (d) { return x(d.x); })
+        .attr("cy", function (d) { return y(d.y); })
+        .style("fill", function (d) { return color[d.cpu]; });
+
+        svg.selectAll(".data_point")
+        .data(data).append("text")
+                .attr("class", "datum_info")
+                .text(function (d) { return d.info })
+                .attr("x", function (d) { return x(d.x) + 5; })
+                .attr("y", function (d) { return y(d.y); })
+                .style("fill", "black");
+
+        $('.dot').mouseover(
+            function () {
+                $(this).siblings('text').show();
+            });
+
+        $('.dot').mouseout(
+            function () {
+                $(this).siblings('text').hide();
+            });
+
+        $('.dot').click(
+            function () {
+                var hostInfo = $(this).siblings('text').text().split('.');
+                window.location.href = "/byUser/HostInfo/?hostName=" + hostInfo[0] + "&lifetimeLabel=" + hostInfo[1]+"&cpus=1";
+            });
+
+        loadingImg("hide");
+    }
+
+    function plotHistogram(data) {
+
+        $('svg').remove();
+
+        var svg = d3.select("#plot_div").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var distributions = [data];
+        var series_names = ["variable"];
+        var numOfTicks = 100;
+        var min = d3.min(data);
+        var max = d3.max(data);
+
+
+
+        d3.select("#plot_div svg")
+    .datum(distributions)
+    .call(histogramChart(numOfTicks, "hist", series_names)
+    .bins(
+    d3.scale.linear()
+            .domain([min, max])
+            .ticks(numOfTicks)
+            )
+    .tickFormat(d3.format(".0f")));
+
+        loadingImg("hide");
+    }
+
+    function getPlottingData() {
+        loadingImg("show", "Generating Plot");
+
+        var plot_type = $("input[name='plot_type']:checked").val();
+        var formData = {
+            x: $("#x_axis").val(),
+            y: $("#y_axis").val(),
+            hist_var: $("#hist_var").val(),
+            plot_type: plot_type
+            };
         formData["filters"] = [];
 
         for (var filter in selected_filters) {
@@ -148,85 +308,32 @@ margin: 10px;
             formData[filter] = selected_filters[filter];
         }
 
-        getDariJson("Advanced", "getCoorelationData", formData,
-            function (data) {
 
-                $('svg').remove();
-
-                var svg = d3.select("#plot_div").append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                x.domain(d3.extent(data, function (d) { return d.x; }));
-                y.domain(d3.extent(data, function (d) { return d.y; }));
-
-                svg.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(xAxis)
-                    .append("text")
-                    .attr("y", -20)
-                    .attr("x", width / 3)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text(x_axis);
-
-                svg.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", 6)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text(y_axis);
+        getDariJson("Advanced", "getCoorelationData", formData, function (result) {
 
 
-                svg.selectAll(".data_point")
-                        .data(data)
-                    .enter().append("g")
-                        .attr("class", "data_point");
-
-                svg.selectAll(".data_point")
-                .data(data)
-                .append("circle")
-                .attr("class", "dot")
-                .attr("r", 3.5)
-                .attr("cx", function (d) { return x(d.x); })
-                .attr("cy", function (d) { return y(d.y); })
-                .style("fill", function (d) { return color[d.cpu]; });
-
-                svg.selectAll(".data_point")
-                .data(data).append("text")
-                        .attr("class", "datum_info")
-                        .text(function (d) { return d.info })
-                        .attr("x", function (d) { return x(d.x) + 5; })
-                        .attr("y", function (d) { return y(d.y); })
-                        .style("fill", "black");
-
-                $('.dot').mouseover(
-                    function () {
-                        $(this).siblings('text').show();
-                    });
-
-                $('.dot').mouseout(
-                    function () {
-                        $(this).siblings('text').hide();
-                    });
-
-                $('.dot').click(
-                    function () {
-                        window.location.href = "/byUser/HostInfo/?hostName=" + $(this).siblings('text').text().split('.')[0];
-                    });
+            var csvContent;
 
 
-
-                loadingImg("hide");
+            if (plot_type == "histogram") {
+                plotHistogram(result.data);
+                csvContent = result.data.join("\n");
+            } else {
+                plotCorrelation(result.data);
+                csvContent += ([$('#x_axis').val(), $('#y_axis').val(), "host name"].join(",") + "\n");
+                var d;
+                for (var i = 0; i < result.data.length; i++) {
+                    d=result.data[i];
+                    csvContent += ([d.x,d.y, d.info].join(",")+"\n");
+                }
             }
-        );
 
+            var encodedUri = encodeURI(csvContent);
+            $('#plot_div a').attr("href", 'data:application/csv;charset=UTF-8,' + encodedUri);
+            $('#plot_div a').attr("download", "my_data.csv");
+
+            $("#query_box pre").text(result.query);
+        });
 
     }
 
@@ -262,6 +369,24 @@ margin: 10px;
 
     }
 
+    function toggleQueryBox() {
+        $("#query_box").toggle("slow");
+    }
+
+    function setVariableSelectors() {
+        var selected_plot_type = $("input[name='plot_type']:checked").val();
+        $(".variable_selectors_div").hide();
+        $("#" + selected_plot_type + "_variable_selectors").show();
+    }
+
+    $(function () {
+        $("#radio").buttonset();
+        setVariableSelectors();
+
+        $("#query_box").toggle();
+        $("input[name='plot_type']").change(setVariableSelectors);
+    });
+
     $(document).ready(function () {
 
         $.getDariJson("Advanced", "getFilterOptions", {}, function (data) {
@@ -283,12 +408,7 @@ margin: 10px;
             $("#filter_name").picker();
             $("#filter_value").picker();
 
-            $("#add_filter_button").click(function () {
-
-
-                var filter_name = $("#filter_name").find('option:selected').text();
-                var filter_value = $("#filter_value").find('option:selected').text();
-
+            function addFilter(filter_name, filter_value) {
                 selected_filters[filter_name] = filter_value;
 
                 var filter_button = $("<button>" + filter_name + "=" + filter_value + '</button>');
@@ -304,20 +424,42 @@ margin: 10px;
                 $("#filter_name").find('option:selected').remove();
                 $("#filter_value").val(''); //reset
                 $("#filter_name").val(''); //reset
+            }
+
+            $("#add_filter_button").click(function () {
+
+
+                var filter_name = $("#filter_name").find('option:selected').text();
+                var filter_value = $("#filter_value").find('option:selected').text();
+                addFilter(filter_name, filter_value);
             });
 
-            $("#ajax_loader").hide('slow');
+            var url_params = eval("(" + '<%= ViewData["parameters"] %>' + ")");
+            if (url_params) {
+                url_params.filters.forEach(function (filter_name) {
+                    addFilter(filter_name, url_params[filter_name]);
+                });
+                $('#x_axis').val(url_params['x']);
+                $('#y_axis').val(url_params['y']);
+                $('#hist_var').val(url_params['hist_var']);
+                $("input[value='"+url_params['plot_type']+"']").attr('checked',true);
+                $("#plot_button").click();
+
+            } else {
+
+                //$("#ajax_loader").hide('slow');
+                loadingImg("hide");
+            }
 
 
         }); //end of getDariJson
 
         populate_plottingVars("#x_axis");
         populate_plottingVars("#y_axis");
+        populate_plottingVars("#hist_var");
 
-        $("#plot_button").click(function () {
-            loadingImg("show", "Generating Plot");
-            plotTemp($("#x_axis").val(), $("#y_axis").val());
-        });
+
+        $("#plot_button").click(getPlottingData);
 
     });
 
