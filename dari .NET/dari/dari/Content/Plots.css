@@ -11,6 +11,14 @@
     fill: #999;
 }
 
+.label 
+{
+    fill: #999;
+    font-size: 14px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 800;
+}
+
 .horizontalGrid 
 {
     fill: none;
@@ -21,20 +29,63 @@
 
 
 
+path.color0, path.color0
+{
+    stroke: #1db34f;
+}
+rect.color0, circle.color0
+{
+    fill: #1db34f;
+}
+.color0 .legend
+{
+    background: #1db34f;
+}
+.color0 
+{
+    color: #1db34f;
+}
+ 
+
 path.color1, path.color1
 {
     stroke: rgb(244,189,58);
 }
-rect.color1
+rect.color1, circle.color1
 {
     fill: rgb(244,189,58);
+}
+.color1 .legend
+{
+    background: rgb(244,189,58);
+}
+.color1 
+{
+    color: rgb(244,189,58);
+}
+
+path.color2, path.color2
+{
+    stroke: rgb(75, 180, 236);
+}
+rect.color2, circle.color2
+{
+    fill: rgb(75, 180, 236);
+}
+.color2 .legend
+{
+    background: rgb(75, 180, 236);
+}
+.color2 
+{
+    color: rgb(75, 180, 236);
 }
 
 
 rect {
     stroke: white;
     fill-opacity:0.65;
-    fill: #1db34f;
+    fill: Gray;
 }
 
 
@@ -64,6 +115,7 @@ rect {
 {
     /*fill: Gray;*/
     /*font: 300 40px Helvetica Neue;*/
+    display: none;
 }
 
 .shaded 

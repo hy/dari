@@ -44,6 +44,8 @@
                 position: absolute;
                 top: 0px;
                 
+                color: White;
+                
                 background-image: linear-gradient(to top,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 100%);
                 
                 border: 2px solid rgba(0,0,0,.1);

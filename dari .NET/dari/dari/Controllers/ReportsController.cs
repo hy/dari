@@ -5,16 +5,12 @@ using System.Web;
 using System.Web.Mvc;
 using dari.Models;
 using System.Web.Script.Serialization;
+using System.Collections;
 
 namespace dari.Controllers
 {
-    [Authorize()]
-    [InitializeFilterAttribute]
-    public class ReportsController : Controller
+    public class ReportsController : DARIController
     {
-
-
-        JSONService jsonService = new JSONService();
 
         public ActionResult Index()
         {
@@ -22,7 +18,7 @@ namespace dari.Controllers
             return View();
         }
 
-        //TODO: save this query
+        [SaveQueryFilter]
         public ActionResult Output(string source, string os, string analysis, string classification, string date,
             string[] series, string Analysis_Parameters, string tblPrefix)
         {
@@ -33,47 +29,45 @@ namespace dari.Controllers
             parameters["analysis"] = analysis;
             parameters["classification"] = classification;
             parameters["date"] = date;
-            parameters["NodeID"] = series;
+            parameters["NodeID"] = new ArrayList(series);
             parameters["ParameterName"] = Analysis_Parameters;
             parameters["tablePrefix"] = tblPrefix;
 
             ViewData["parameters"] = new JavaScriptSerializer().Serialize(parameters);
 
+            ViewData["reportInfo"] = getJSON(source, "getReportInfo", parameters);
+
             return View();
         }
 
-        public JsonResult getData(string source, string os, string analysis, string classification, string date,
+        public EmptyResult getData(string source, string os, string analysis, string classification, string date,
             string[] NodeID, string ParameterName, string tablePrefix, string format)
         {
-            ViewData["monthly_reports_link_class"] = "current_section";
 
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters["os"] = os;
             parameters["analysis"] = analysis;
             parameters["classification"] = classification;
             parameters["date"] = date;
-            parameters["NodeID"] = NodeID;
+            parameters["NodeID"] = new ArrayList(NodeID);
             parameters["ParameterName"] = ParameterName;
             parameters["tablePrefix"] = tablePrefix;
             parameters["format"] = format;
 
-            Object results = jsonService.get(source, "getData", parameters);
-
-            return Json(results, JsonRequestBehavior.AllowGet);
+            return jsonResponse(source, "getData", parameters);
         }
 
 
-        public JsonResult getAnalysisOptions(string source, string os)
+        public EmptyResult getAnalysisOptions(string source, string os)
         {
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters["os"] = os;
 
-            Object results = jsonService.get(source, "getAnalysisOptions", parameters);
-            return Json(results, JsonRequestBehavior.AllowGet);
+            return jsonResponse(source, "getAnalysisOptions", parameters);
 
         }
 
-        public JsonResult getAnalysisParams(string source, string os, string analysis, string classification, string Date)
+        public EmptyResult getAnalysisParams(string source, string os, string analysis, string classification, string Date)
         {
 
             Dictionary<string, object> parameters = new Dictionary<string, object>();
@@ -82,8 +76,7 @@ namespace dari.Controllers
             parameters["classification"] = classification;
             parameters["date"] = Date;
 
-            Object results = jsonService.get(source, "getAnalysisParams", parameters);
-            return Json(results, JsonRequestBehavior.AllowGet);
+            return jsonResponse(source, "getAnalysisParams", parameters);
 
         }
 

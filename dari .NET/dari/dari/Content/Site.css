@@ -22,13 +22,10 @@
         color: Black;
         width: 800px;
         margin: 0px auto;
-  /*      -moz-box-shadow:    1px 1px 10px 1px #0F0A0A;
-        -webkit-box-shadow: 1px 1px 10px 1px #0F0A0A;
-        box-shadow:         1px 1px 10px 1px #0F0A0A; */
         position: relative;
     }
     
-        #main > div 
+        #main > div#mainContent 
         {
             padding: 50px 10% 20px 10%;
         }
@@ -155,6 +152,7 @@ vertical-align: middle;
             border-radius: 3px;
             padding: 0 20px; 
             background-color: #29a02c;
+            background-color: rgb(165, 208, 40);
             background-image: linear-gradient(to bottom,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 100%);
             -webkit-transition: background-color 150ms linear;
             border: 0px;
@@ -165,6 +163,8 @@ display: inline-block;
                 cursor: pointer;
                 float: right;
             top: 15px;
+            background-color: rgb(49,182,253);
+            color: rgb(47, 52, 77);
         }
         
             #top_bar #source_selector:hover
@@ -204,6 +204,29 @@ display: inline-block;
             {
                 width: 150px; 
                 }
+
+
+        #ajax_loader
+        {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 110%;
+            height: 100%;
+            text-align: center;
+            background: White;
+            line-height: 500px;
+        }
+    
+            #ajax_loader div
+            {
+            margin: 0 auto;
+            text-align: center;
+            color: rgb(49,182,253);
+            font-size: 30px;
+            display: inline;
+                vertical-align: middle;
+            }
 
 
 h1 
@@ -279,58 +302,42 @@ h1
 
 
         
-        
+    /*accordion. used in reporting options, and displaying user lifetimes */  
     #panels 
     {
         margin-bottom: 30px;
     }
 
+        #panels > div
+        {
+            font-size: 14px;
+            /* text-align: center; */
+        }
+
+        #panels .styled-select {
+            border: 2px White solid;
+            box-shadow: none;
+        }
+
+        
+        #panels li {
+            list-style-type: disk;
+        }
+       
+       
+            
+    /*heading sections */
     #header 
     {
-        background: rgb(69,132,211);
         color: White;
         padding: 20px;
     }
-    
-
-       #goToPlotButton
-       {
-           background: rgb(49,182,253);
-            display: block;
-            padding: 30px 0px;
-            text-align: center;
-            margin: 20px 5%;
-            position: absolute;
-            bottom: 0px;
-            width: 90%;
-            color: white;
-            font-size: 30px;
-            text-decoration: none;
-            box-shadow: 1px 1px 5px 0px #0F0A0A;
-            border-radius: 5px;
-            display: none;
-       }
-       
 
     #hostname
     {
         color: rgb(49,182,253);
         font-size: 35px;
     }
-
-    #panels > div
-    {
-        font-size: 14px;
-    }
-        #panels li {
-            list-style-type: disk;
-        }
-
-
-       #panels .styled-select {
-        border: 2px White solid;
-        box-shadow: none;
-       }
 
 
 
@@ -373,17 +380,22 @@ tbody tr:nth-child(odd) {background: rgb(253,244,232)}
         color: White;
         text-decoration: none;
         
-                    background-color: #29a02c;
-            background-image: linear-gradient(to bottom,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 100%);
-            -webkit-transition: background-color 150ms linear;border: 2px solid rgba(0,0,0,.1);
-                box-shadow: 1px 1px 3px 0 gray;
-                cursor: pointer;
+        background-color: #29a02c;
+        background-image: linear-gradient(to bottom,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 100%);
+        -webkit-transition: background-color 150ms linear;border: 2px solid rgba(0,0,0,.1);
+        box-shadow: 1px 1px 3px 0 gray;
+        cursor: pointer;
+        
+        background-color: rgb(165, 208, 40);
+        color: rgb(69, 95, 65);
+        border: 2px solid rgb(69, 95, 65);
     }
 
     button:hover, .button:hover 
     {
-        background: rgb(120,152,26);
-        background-color:#32c135;
+       /* background: rgb(120,152,26);
+        background-color:#32c135; */
+            background-image: linear-gradient(to top,rgba(255,255,255,.3) 0%,rgba(255,255,255,0) 100%);
     }
 
     /*svg styling */

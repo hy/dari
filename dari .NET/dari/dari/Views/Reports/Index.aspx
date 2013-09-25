@@ -51,6 +51,7 @@
                 dependantParam = true;
             } else if (dependantParam) {
                 $('select[name="' + params[i] + '"]').html("<option></option>");
+                $('#' + params[i] + ' strong').text("");
             }
         }
 
@@ -71,6 +72,9 @@
                 latestDiv.append('<select name="' + param + '"><option></option></select>');
 
                 $('select').last().picker();
+            } else {
+                //left justify
+                latestDiv.css('text-align', 'left');
             }
 
         });
@@ -194,10 +198,10 @@
 
         $("#plotButton").click(function () {
             var values = $("#param_form").serialize();
-            window.location = "Reports/Output/" + data_source + "?" + values;
+            window.location = "/Reports/Output/" + data_source + "?" + values;
         });
 
-    });    // end of document ready
+    });      // end of document ready
 
 </script>
 
@@ -209,6 +213,14 @@
         
     }
 
+    #panels > div
+    {
+        text-align: center;
+    }
+    
+    #plotButton {
+        width: 100%;
+    }
 </style>
 
 </asp:Content>

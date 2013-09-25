@@ -10,8 +10,7 @@ namespace dari.Controllers
     [InitializeFilter]
     public class HomeController : Controller
     {
-        //[Authorize(Roles = @"FM6SWWW062\DARI_Access")]
-        [Authorize()]
+        //[Authorize()]
         public ActionResult Index()
         {
             //return RedirectToAction("Index", "Summary");

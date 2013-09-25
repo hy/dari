@@ -36,19 +36,18 @@
             </div>
         </div>
         <button id="plot_button">Plot</button>
-        <div id="ajax_loader">
-            <div><img src="../../Content/images/filter_loading.gif"/> &nbsp <span>Preparing Filter Options</span>... </div>
+
+       
+
+        <div id="plot_div">
+            <a href="javascript:toggleQueryBox()">(View Query Text)</a>
+            <div id="query_box" class="grey_box">
+                <pre></pre>
+            </div>
         </div>
     </div>
 
-     <a href="javascript:toggleQueryBox()">(View Query Text)</a>
-    <div id="query_box" class="grey_box">
-        <pre></pre>
-    </div>
-
-    <div id="plot_div">
-        <a>Download Data</a>
-    </div>
+     
 
    
 </asp:Content>
@@ -68,40 +67,30 @@
     {
         width: 150px;
         }
-    .data_point
+        
+    #plot_div 
     {
-        fill: rgb(49,182,253);
-        opacity: 0.5;
-        cursor: pointer;
+        display: none;
+    }
+        #plot_div .data_point
+        {
+            fill: rgb(49,182,253);
+            opacity: 0.5;
+            cursor: pointer;
         }
+        
+            #plot_div .data_point .datum_info
+            {
+                display: none;
+            }
+            
         
     #filtering_div
     {
         padding: 10px;
     }
     
-    #ajax_loader
-    {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 110%;
-        height: 100%;
-        text-align: center;
-        vertical-align: center;
-        background: White;
-    }
-    
-    #ajax_loader div
-    {
-        position: absolute;
-        top: 30%;
-    width: 110%;
-    margin: 0 auto;
-    text-align: center;
-    color: rgb(49,182,253);
-font-size: 30px;
-    }
+
     
     #filters_list {
 /* background-color: rgb(49,182,253); */
@@ -254,7 +243,7 @@ white-space: pre-wrap;
         $('.dot').click(
             function () {
                 var hostInfo = $(this).siblings('text').text().split('.');
-                window.location.href = "/byUser/HostInfo/?hostName=" + hostInfo[0] + "&lifetimeLabel=" + hostInfo[1]+"&cpus=1";
+                window.location.href = "/byUser/HostPage/?hostName=" + hostInfo[0] + "&lifetimeLabel=" + hostInfo[1]+"&cpus=1";
             });
 
         loadingImg("hide");
@@ -323,16 +312,22 @@ white-space: pre-wrap;
                 csvContent += ([$('#x_axis').val(), $('#y_axis').val(), "host name"].join(",") + "\n");
                 var d;
                 for (var i = 0; i < result.data.length; i++) {
-                    d=result.data[i];
-                    csvContent += ([d.x,d.y, d.info].join(",")+"\n");
+                    d = result.data[i];
+                    csvContent += ([d.x, d.y, d.info].join(",") + "\n");
                 }
             }
 
             var encodedUri = encodeURI(csvContent);
-            $('#plot_div a').attr("href", 'data:application/csv;charset=UTF-8,' + encodedUri);
-            $('#plot_div a').attr("download", "my_data.csv");
+            var download_link = $('<a></a>')
+                .attr("href", 'data:application/csv;charset=UTF-8,' + encodedUri)
+                .attr("download", "my_data.csv")
+                .text("Download Data");
+            //$('#plot_div a').attr("href", 'data:application/csv;charset=UTF-8,' + encodedUri);
+            //$('#plot_div a').attr("download", "my_data.csv");
 
             $("#query_box pre").text(result.query);
+            $("#plot_div").append(download_link);
+            $("#plot_div").show();
         });
 
     }
@@ -359,16 +354,6 @@ white-space: pre-wrap;
         $(this).remove();
     }
 
-    function loadingImg(action, message) {
-        if (action == "show") {
-            $("#ajax_loader span").text(message);
-            $("#ajax_loader").show();
-        } else {
-            $("#ajax_loader").hide('slow');
-        }
-
-    }
-
     function toggleQueryBox() {
         $("#query_box").toggle("slow");
     }
@@ -388,6 +373,8 @@ white-space: pre-wrap;
     });
 
     $(document).ready(function () {
+
+        loadingImg("show", "Preparing Filter Options");
 
         $.getDariJson("Advanced", "getFilterOptions", {}, function (data) {
             filters = data;
@@ -442,12 +429,11 @@ white-space: pre-wrap;
                 $('#x_axis').val(url_params['x']);
                 $('#y_axis').val(url_params['y']);
                 $('#hist_var').val(url_params['hist_var']);
-                $("input[value='"+url_params['plot_type']+"']").attr('checked',true);
+                $("input[value='" + url_params['plot_type'] + "']").attr('checked', true);
                 $("#plot_button").click();
 
             } else {
 
-                //$("#ajax_loader").hide('slow');
                 loadingImg("hide");
             }
 

@@ -8,13 +8,10 @@ using System.Web.Script.Serialization;
 
 namespace dari.Controllers
 {
-    [Authorize()]
-    [InitializeFilter]
-    public class AdvancedController : Controller
+    public class AdvancedController : DARIController
     {
         //
         // GET: /Advanced/
-        JSONService jsonService = new JSONService();
 
         public ActionResult Index(string source, string x, string y, string hist_var, string plot_type, string[] filters, string replot)
         {
@@ -42,14 +39,15 @@ namespace dari.Controllers
             return View("correlation");
         }
 
-        public JsonResult getFilterOptions(string source)
+        public EmptyResult getFilterOptions(string source)
         {
-            Object results = jsonService.get(source, "getFilterOptions", null);
-            return Json(results, JsonRequestBehavior.AllowGet);
+            //Object results = jsonService.get(source, "getFilterOptions", null);
+            //return Json(results, JsonRequestBehavior.AllowGet);
+            return jsonResponse(source, "getFilterOptions", null);
         }
 
         [SaveQueryFilter(newUrlLabel = "Analytics")]
-        public JsonResult getCoorelationData(string source, string x, string y, string hist_var, string plot_type, string[] filters)
+        public EmptyResult getCoorelationData(string source, string x, string y, string hist_var, string plot_type, string[] filters)
         {
 
             Dictionary<string, object> parameters = new Dictionary<string, object>();
@@ -63,9 +61,10 @@ namespace dari.Controllers
                 parameters[filter] = Request.Params[filter];
             }
 
-            Object results = jsonService.get(source, "correlation", parameters);
+            //Object results = jsonService.get(source, "correlation", parameters);
 
-            return Json(results, JsonRequestBehavior.AllowGet);
+            //return Json(results, JsonRequestBehavior.AllowGet);
+            return jsonResponse(source, "correlation", parameters);
         }
 
         public ActionResult correlation()

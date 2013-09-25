@@ -39,6 +39,16 @@
 
         }
 
+        //define ajax wrapper that automatically sends data source
+        function makeDariUrl(controller, action, data) {
+
+            var url = [, controller, action, data_source].join('/');
+
+            url += ("?" + $.param( data ));
+
+            return url;
+        }
+
         $.fn.picker = function () {
             this.wrap("<div class='styled-select' />");
             this.parent().append("<span class='ui-button-icon-secondary ui-icon ui-icon-carat-1-s' />");
@@ -49,13 +59,28 @@
         };
 
 
-        if(window.$)
+        if (window.$) {
             window.$.getDariJson = getDariJson;
-
+            window.$.makeDariUrl = makeDariUrl;
+        }
+        
+        
         function changeDataSource(source_name) {
             data_source = source_name;
             $('#displayed_source_name').text(source_name);
         }
+
+        function loadingImg(action, message) {
+            if (action == "show") {
+                $("#ajax_loader span").text(message);
+                $("#ajax_loader").show();
+            } else {
+                $("#ajax_loader").hide('slow');
+            }
+
+        }
+
+
         $(function () {
             $("#data_source_menu").menu();
         });
@@ -63,6 +88,7 @@
         $(document).ready(function () {
             $('#data_source_menu').hide();
 
+            //TO DO: update source with URL parameter if exists
             changeDataSource('<%= ViewData["initial_data_source"] %>');
 
             $('#displayed_source_name').click(function () {
@@ -74,6 +100,7 @@
                 changeDataSource($(this).text());
                 $.post("/Home/saveSelectedSource", { source_name: $(this).text() });
             });
+
         })
     
     </script>
@@ -86,7 +113,7 @@
         <div>
             <span class="left" id="home_link" ><a href="/">DARI</a></span>
             <ul id="navigation_links">
-            <li class="<%= ViewData["monthly_reports_link_class"] %>"  ><a href="/Summary">Monthly Reports</a></li>
+            <li class="<%= ViewData["monthly_reports_link_class"] %>"  ><a href="/Reports">Monthly Reports</a></li>
             <li class="<%= ViewData["user_history_link_class"] %>" ><a href="/byUser">User History</a></li>
             <li class="<%= ViewData["analytics_link_class"] %>"><a  href="/Advanced">Analytics</a></li>
             </ul>
@@ -107,6 +134,9 @@
         <div id="main">
             <div id="mainContent"><asp:ContentPlaceHolder ID="MainContent" runat="server" />
 
+            </div>
+            <div id="ajax_loader" style="display: none">
+                <div><img src="../../Content/images/filter_loading.gif"/> &nbsp <span>Loading</span>... </div>
             </div>
         </div>
         <div id="footer">
