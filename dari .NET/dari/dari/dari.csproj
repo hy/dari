@@ -71,21 +71,18 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdvancedController.cs" />
     <Compile Include="Controllers\byUserController.cs" />
     <Compile Include="Controllers\DARIController.cs" />
+    <Compile Include="Controllers\HighlightLinkFilterAttribute.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InitializeFilterAttribute.cs" />
-    <Compile Include="Controllers\jsonAPIController.cs" />
-    <Compile Include="Controllers\PlotController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\SaveQueryFilterAttribute .cs" />
-    <Compile Include="Controllers\SummaryController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\DariDataSources.cs" />
     <Compile Include="Models\JSONService.cs" />
     <Compile Include="Models\SEMAService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -96,45 +93,16 @@
     <Content Include="Content\images\computer_icon.png" />
     <Content Include="Content\images\filter_loading.gif" />
     <Content Include="Content\images\graph_icon.png" />
-    <Content Include="Content\jquery.jscrollpane.css" />
     <Content Include="Content\Plots.css" />
     <Content Include="Global.asax" />
-    <Content Include="public\box.js" />
-    <Content Include="public\box_plot.html" />
-    <Content Include="public\dataset_colors.css" />
-    <Content Include="public\down_arrow_brown.jpg" />
-    <Content Include="public\down_arrow_select.jpg" />
-    <Content Include="public\graph0.htm" />
-    <Content Include="public\graph1.htm" />
-    <Content Include="public\graph2.htm" />
-    <Content Include="public\graph_hist.htm" />
-    <Content Include="public\histogram-chart.js" />
-    <Content Include="public\images\ajax-loader.gif" />
-    <Content Include="public\images\small_ajax.gif" />
-    <Content Include="public\images\symbols_2012.png" />
-    <Content Include="public\menu.htm" />
-    <Content Include="public\plot_selector.htm" />
-    <Content Include="public\process_data.py" />
-    <Content Include="public\sema_interface.html" />
-    <Content Include="public\try.gif" />
-    <Content Include="Scripts\jquery.jscrollpane.min.js" />
-    <Content Include="Scripts\jquery.mousewheel.js" />
-    <Content Include="Scripts\mwheelIntent.js" />
-    <Content Include="Scripts\plots\box.js" />
-    <Content Include="Scripts\plots\correlation_plot_d3.js" />
-    <Content Include="Views\byUser\HostInfo.ascx" />
+    <Content Include="Content\images\small_ajax.gif" />
     <Content Include="Views\byUser\HostPage.aspx" />
     <Content Include="Views\byUser\SearchHosts.aspx" />
     <Content Include="Views\Home\Home.ascx" />
     <Content Include="Views\Reports\Index.aspx" />
-    <Content Include="Views\Plot\Blank.ascx" />
-    <Content Include="Views\Plot\LineGraph.ascx" />
-    <Content Include="Views\Plot\Plot.aspx" />
     <Content Include="Views\Advanced\correlation.aspx" />
     <Content Include="Views\Reports\Output.aspx" />
-    <Content Include="Views\summary\Plotter.aspx" />
-    <Content Include="Views\summary\Plotting.ascx" />
-    <Content Include="Views\summary\summaryUI.aspx" />
+    <Content Include="Views\Shared\UnsupportedBrowser.ascx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -145,22 +113,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Content\Site.css" />
-    <Content Include="Scripts\jquery-1.4.1.js" />
-    <Content Include="Scripts\jquery-1.4.1.min.js" />
-    <Content Include="Scripts\jquery-1.4.1-vsdoc.js" />
-    <Content Include="Scripts\jquery.validate.js" />
-    <Content Include="Scripts\jquery.validate.min.js" />
-    <Content Include="Scripts\jquery.validate-vsdoc.js" />
-    <Content Include="Scripts\MicrosoftAjax.js" />
-    <Content Include="Scripts\MicrosoftAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcValidation.js" />
-    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
-    <Content Include="Views\Account\ChangePassword.aspx" />
-    <Content Include="Views\Account\ChangePasswordSuccess.aspx" />
-    <Content Include="Views\Account\LogOn.aspx" />
-    <Content Include="Views\Account\Register.aspx" />
     <Content Include="Views\Home\About.aspx" />
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
@@ -170,16 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="public\data.csv" />
-    <None Include="public\hist_data.csv" />
-    <None Include="public\hist_data2.csv" />
-    <None Include="public\hist_data3.csv" />
-    <None Include="public\morley.csv" />
-    <None Include="public\population.csv" />
-    <None Include="public\random_data.csv" />
-    <None Include="public\systems_monitored.csv" />
+    <Folder Include="Scripts\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

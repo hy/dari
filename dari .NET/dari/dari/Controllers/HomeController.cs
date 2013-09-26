@@ -10,27 +10,15 @@ namespace dari.Controllers
     [InitializeFilter]
     public class HomeController : Controller
     {
-        //[Authorize()]
+        // Front Page
         public ActionResult Index()
         {
-            //return RedirectToAction("Index", "Summary");
-
-            string label0 = "";
-            string url0 = "";
-            if (Request.Cookies["label0"] != null)
-                label0 = Request.Cookies["label0"].Value;
-            if (Request.Cookies["url0"] != null)
-                url0 = Request.Cookies["url0"].Value;
-
-
-            ViewData["notSupported"] = (Request.Browser.Browser.Equals("IE") && Convert.ToDecimal(Request.Browser.Version) < 9);
-            
-            ViewData["recentPlot"] = "<a  href='/Plot/SummaryPlot/?" + url0 + "'>" + label0 + "</a>";
-
             string label;
             string url;
             string recentPlotsHTML = "";
             bool hasNoRecentPlots = true; ;
+            
+            //Get Saved Queries for Display
             for (int i = 0; i < 10; i++)
             {
                 label = "";
@@ -52,15 +40,14 @@ namespace dari.Controllers
             ViewData["recentPlots"] = recentPlotsHTML;
 
             return View();
-            //return PartialView("Home");
-
 
         }
 
-        public ActionResult About()
+        public ActionResult UnsupportedBrowser()
         {
-            return View();
+            return PartialView("UnsupportedBrowser");
         }
+
 
         [HttpPost]
         public ActionResult saveSelectedSource(string source_name)

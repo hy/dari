@@ -44,19 +44,25 @@ namespace SEMA_JSON_Server.Controllers
                     results = semaService.getHostInfo(parameters);
                     break;
 
+                case "getHostData":
+                    results = semaService.getHostData(parameters);
+                    break;
+
 
                 /* for agregate data */
-                case "getReportDates":
-                    results = semaService.getReportDates(parameters);
-                    break;
+                /*
+            case "getReportDates":
+                results = semaService.getReportDates(parameters);
+                break;
 
-                case "getReportClasses":
-                    results = semaService.getReportClasses(parameters);
-                    break;
+            case "getReportClasses":
+                results = semaService.getReportClasses(parameters);
+                break;
 
-                case "getPlottingData":
-                    results = semaService.getPlottingData(parameters);
-                    break;
+            case "getPlottingData":
+                results = semaService.getPlottingData(parameters);
+                break;
+                */
 
                 /* for advanced analysis*/
                 case "correlation":
@@ -76,6 +82,9 @@ namespace SEMA_JSON_Server.Controllers
                     break;
                 case "getData":
                     results = semaService.getData(parameters);
+                    break;
+                case "getReportInfo":
+                    results = semaService.getReportInfo(parameters);
                     break;
 
                 default:

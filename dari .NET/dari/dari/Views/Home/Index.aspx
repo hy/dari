@@ -132,10 +132,6 @@ height: 300px;
 
    <script>
 
-       $(function () {
-           $('.scroll-pane').jScrollPane();
-       });
-
        $(document).ready(function () {
            //var button_colors = ["rgb(165,208,40)", "rgb(245,192,64)", "rgb(49,182,253)"];
            var left_positions = ["0px", "33%", "66%"];

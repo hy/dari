@@ -29,7 +29,7 @@
     <div class="selectorGroup">
         <span>By Name:</span>
         <div class="styled-select">
-            <input id="hostSearch" type="text" /> <img id="small_loader" class="ajax" src="/public/images/small_ajax.gif"/> 
+            <input id="hostSearch" type="text" /> <img id="small_loader" class="ajax" src="/Content/images/small_ajax.gif"/> 
         </div>
     </div>
 

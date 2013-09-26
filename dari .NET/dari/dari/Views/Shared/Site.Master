@@ -13,8 +13,6 @@
     <link href="../../Content/Plots.css" rel="stylesheet" type="text/css" />
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-  <script src="../../Scripts/jquery.jscrollpane.min.js"></script>
-  <script src="../../Scripts/jquery.mousewheel.js"></script>
 
     <script>
 
@@ -88,7 +86,6 @@
         $(document).ready(function () {
             $('#data_source_menu').hide();
 
-            //TO DO: update source with URL parameter if exists
             changeDataSource('<%= ViewData["initial_data_source"] %>');
 
             $('#displayed_source_name').click(function () {
@@ -123,9 +120,12 @@
                 <span class="left">Connected to:</span>
                 <span id="displayed_source_name">SEMA </span>
                 <ul id="data_source_menu">
-                  <li><a href="#">SEMA</a></li>
+                <%foreach(var data_option in (List<string>) ViewData["dataSourceOptions"] ){ %>
+                    <li><a href="#"><%= data_option %></a></li>
+                <%} %>
+             <%--     <li><a href="#">SEMA</a></li>
                   <li><a href="#">DCA</a></li>
-                  <li><a href="#">SEMA2</a></li>
+                  <li><a href="#">SEMA2</a></li>--%>
                 </ul>
             </div>
         </div>

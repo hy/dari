@@ -10,8 +10,6 @@
         <span class="instructions">Click dates for more details on each instance of this host</span>
         <div id="panels"></div>
 
-         <img id="loading_gif" class="ajax" src="/public/images/ajax-loader.gif"/>
-
          <div id="plotCanvas">
          <div><svg></svg></div>
          <p class="instructions">Zoom in or out of plot with mouse, or manually change dates and click replot.</p>

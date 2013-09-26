@@ -8,19 +8,17 @@ using System.Collections;
 
 namespace dari.Controllers
 {
+    [HighlightLinkFilter(linkName = "user_history_link_class")]
     public class byUserController : DARIController
     {
 
         public ActionResult Index()
         {
-            ViewData["user_history_link_class"] = "current_section";
             return View("searchHosts");
         }
 
         public ActionResult HostPage(string hostName, string lifetimeIdx, string start, string end, string[] cpus, string os)
         {
-            ViewData["user_history_link_class"] = "current_section";
-
 
             ViewData["hostName"] = hostName;
             ViewData["lifetimeIdx"] = lifetimeIdx;

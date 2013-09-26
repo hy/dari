@@ -10,9 +10,6 @@ namespace dari.Controllers
 {
     public class AdvancedController : DARIController
     {
-        //
-        // GET: /Advanced/
-
         public ActionResult Index(string source, string x, string y, string hist_var, string plot_type, string[] filters, string replot)
         {
             if (replot != null)
@@ -41,8 +38,6 @@ namespace dari.Controllers
 
         public EmptyResult getFilterOptions(string source)
         {
-            //Object results = jsonService.get(source, "getFilterOptions", null);
-            //return Json(results, JsonRequestBehavior.AllowGet);
             return jsonResponse(source, "getFilterOptions", null);
         }
 
@@ -61,9 +56,6 @@ namespace dari.Controllers
                 parameters[filter] = Request.Params[filter];
             }
 
-            //Object results = jsonService.get(source, "correlation", parameters);
-
-            //return Json(results, JsonRequestBehavior.AllowGet);
             return jsonResponse(source, "correlation", parameters);
         }
 

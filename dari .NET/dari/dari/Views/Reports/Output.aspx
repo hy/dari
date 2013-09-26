@@ -642,6 +642,7 @@
 
         $(function () {
             $("#tabs").tabs();
+            $("li.ui-state-default a").focus(function () { $(this).blur(); }); //so that orange glow doesn't show after tab is clicked
 
             getData("Histogram", plotHistogram);
             getData("ProbPlot", plotProb);
@@ -655,9 +656,9 @@
             $("#classification").text(reportInfo.classification_name);
             var date_stamp = new Date(formData["date"] * 1000);
             $('#date').text(date_stamp.toLocaleDateString());
-            for (var i=0; i < formData.NodeID.length; i++){
+            for (var i = 0; i < formData.NodeID.length; i++) {
                 var nodeID = formData.NodeID[i];
-                seriesNames[i]=reportInfo.nodeClasses[nodeID];
+                seriesNames[i] = reportInfo.nodeClasses[nodeID];
             }
             buildColorPicker();
 

@@ -9,12 +9,12 @@ using System.Collections;
 
 namespace dari.Controllers
 {
+    [HighlightLinkFilter(linkName = "monthly_reports_link_class")]
     public class ReportsController : DARIController
     {
 
         public ActionResult Index()
         {
-            ViewData["monthly_reports_link_class"] = "current_section";
             return View();
         }
 
@@ -22,8 +22,6 @@ namespace dari.Controllers
         public ActionResult Output(string source, string os, string analysis, string classification, string date,
             string[] series, string Analysis_Parameters, string tblPrefix)
         {
-            ViewData["monthly_reports_link_class"] = "current_section";
-
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters["os"] = os;
             parameters["analysis"] = analysis;
@@ -69,7 +67,6 @@ namespace dari.Controllers
 
         public EmptyResult getAnalysisParams(string source, string os, string analysis, string classification, string Date)
         {
-
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters["os"] = os;
             parameters["analysis"] = analysis;
