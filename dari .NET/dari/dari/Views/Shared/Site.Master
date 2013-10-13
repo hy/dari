@@ -5,23 +5,22 @@
 <head runat="server">
     <title><asp:ContentPlaceHolder ID="TitleContent" runat="server" /></title>
 
-   <script src="http://d3js.org/d3.v3.js"></script>
-   
-    <link href="../../Content/jquery.jscrollpane.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <link href="../../Content/Site.css" rel="stylesheet" type="text/css" />
     <link href="../../Content/Plots.css" rel="stylesheet" type="text/css" />
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 
     <script>
 
+        // Global variable that stores the data source to which the user is currently connected
         var data_source = '<%= ViewData["initial_data_source"] %>';
 
-        //define ajax wrapper that automatically sends data source
+        //getDariJson(): ajax wrapper that automatically sends data source with the request
         function getDariJson(controller, action, data, callback) {
 
-            //var source = $("#source_selector").val();
             var url = [, controller, action, data_source].join('/');
 
             $.ajax({
@@ -37,7 +36,7 @@
 
         }
 
-        //define ajax wrapper that automatically sends data source
+        //makeDariUrl():  url generator that automatically includes the data source
         function makeDariUrl(controller, action, data) {
 
             var url = [, controller, action, data_source].join('/');
@@ -47,6 +46,7 @@
             return url;
         }
 
+        //$.picker():  converts regular select input into a a styled drop down menu
         $.fn.picker = function () {
             this.wrap("<div class='styled-select' />");
             this.parent().append("<span class='ui-button-icon-secondary ui-icon ui-icon-carat-1-s' />");
@@ -56,18 +56,19 @@
             return this;
         };
 
-
+        //make custom function part of jquery
         if (window.$) {
             window.$.getDariJson = getDariJson;
             window.$.makeDariUrl = makeDariUrl;
         }
-        
-        
+
+        //changeDataSource(): changes the data source on the code side and on the dislay side
         function changeDataSource(source_name) {
             data_source = source_name;
             $('#displayed_source_name').text(source_name);
         }
 
+        //loadingImg(): toggles the view of the spinning graphic that tells when a process is waiting
         function loadingImg(action, message) {
             if (action == "show") {
                 $("#ajax_loader span").text(message);
@@ -78,12 +79,11 @@
 
         }
 
-
+        //Runs when document has initialized
         $(function () {
-            $("#data_source_menu").menu();
-        });
 
-        $(document).ready(function () {
+            //Create and intialized the drop down menu for the data source
+            $("#data_source_menu").menu(); 
             $('#data_source_menu').hide();
 
             changeDataSource('<%= ViewData["initial_data_source"] %>');
@@ -98,7 +98,425 @@
                 $.post("/Home/saveSelectedSource", { source_name: $(this).text() });
             });
 
-        })
+        }); //end of code that runs when document is ready
+
+
+        /*This object constructor is used to generate a plot builder
+        --parameters--
+        selector: the selector for the element in which the plot is to be built
+         */
+        function dariPlotter(selector) {
+
+            /* enumeration of plot Types
+             these are used to specify special kinds of plots when building axes
+             * DEFAULT: the default of plot
+             * BOX_PLOT: used to make a special y axis, that covers the extent of all the datat in the boxplot
+             * TIME_SERIES: used to make a special x axis that has dates instead of regular numbers
+            */
+            this.plotTypes = {
+                "DEFAULT": 0,
+                "BOX_PLOT": 1,
+                "TIME_SERIES": 2,
+            };
+
+            /* initialziing standard elements for the plot */
+            this.margin = { top: 5, right: 10, bottom: 50, left: 50 },
+            this.width = 960 - this.margin.left - this.margin.right,
+            this.height = 500 - this.margin.top - this.margin.bottom;
+
+            this.parseDate = d3.time.format("%d-%b-%y").parse;
+
+            this.x = d3.scale.linear()
+                .range([0, this.width]);
+
+            this.y = d3.scale.linear()
+                .range([this.height, 0]);
+
+            this.xAxis = d3.svg.axis()
+                .scale(this.x)
+                .orient("bottom");
+
+            this.yAxis = d3.svg.axis()
+                .scale(this.y)
+                .orient("left");
+
+            //the svg element in which the plot will be built
+            this.svg = d3.select(selector).append("svg")
+                .attr("width", this.width + this.margin.left + this.margin.right)
+                .attr("height", this.height + this.margin.top + this.margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+            /* draws a Y axis
+            --paramters--
+                label: the text to label the axis
+                dataset: the data that will be plotted against this axis. Is an array of datum objects, or an array of such arrays (as in the case of a multi-plot)
+                options: optional paramters including
+                · plotType: the plotType enumerator indicating which type of plot this axis is for (default is DEFAULT)
+                · coordinate: the member of each datum object in the dataset that will be the y-coordinate (default is "y")
+             */
+            this.drawYaxis = function (label, dataset, options) {
+
+                var options = options || {};
+                var plotType = options.plotType || 0;
+                var coordinate = options.coordinate || "y";
+
+
+                //if data is an array of arrays, merge
+                var dataArr = $.isArray(dataset[0]) ? d3.merge(dataset) : dataset;
+                var findCoordinateFunc = function (d) { return d[coordinate]; };
+
+                if (plotType == this.plotTypes.BOX_PLOT) {
+                    dataArr = [];
+                    dataset.forEach( function (el) { this.push(el.Min); this.push(el.Max);}, dataArr);
+                    findCoordinateFunc = function (d) { return d; };
+                }
+
+                var domain = d3.extent(dataArr, findCoordinateFunc);
+                this.y.domain(domain);
+
+                this.svg.append("g")
+                    .attr("class", "y axis")
+                    .call(this.yAxis);
+
+                this.svg.append("text")
+                .attr("class", "label")
+                .attr("y", (this.height + this.margin.top + this.margin.bottom) / 2)
+                .attr("x", -1 * (this.margin.left - 20))
+                .style("writing-mode", "tb")
+                .text(label);
+
+            };
+
+            /* draws a X axis
+            --paramters--
+                label: the text to label the axis
+                dataset: the data that will be plotted against this axis. Is an array of datum objects, or an array of such arrays (as in the case of a multi-plot)
+                options: optional paramters including
+                · plotType: the plotType enumerator indicating which type of plot this axis is for (default is DEFAULT)
+                · coordinate: the member of each datum object in the dataset that will be the x-coordinate (default is "x")
+             */
+            this.drawXaxis = function (label, dataset, options) {
+
+                var options = options || {};
+                var plotType = options.plotType || 0;
+                var coordinate = options.coordinate || "x";
+
+                //if data is an array of arrays, merge
+                var dataArr = $.isArray(dataset[0]) ? d3.merge(dataset) : dataset;
+
+                if (plotType == this.plotTypes.TIME_SERIES) {
+                    var width = this.width;
+                    this.x = d3.time.scale()
+                        .range([0, width]);
+                    this.xAxis.scale(this.x);
+                    this.xAxis.tickFormat(d3.time.format("%d-%b-%y"));
+                }
+
+                var domain = d3.extent(dataArr, function (d) { return d[coordinate]; });
+                this.x.domain(domain);
+
+                this.svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + this.height + ")")
+                .call(this.xAxis);
+
+                this.svg.append("text")
+                .attr("class", "label")
+                .attr("y", this.height + this.margin.top + this.margin.bottom - 10)
+                .attr("x", this.width / 4)
+                .text(label);
+
+
+            };
+
+            /* draws horizontal gird lines */
+            this.drawHorizontalGrids = function () {
+                var y = this.y;
+                var width = this.width;
+                this.svg.selectAll("line.horizontalGrid").data(y.ticks(10)).enter()
+                .append("line")
+                .attr(
+                {
+                    "class": "horizontalGrid",
+                    "x1": 0,
+                    "x2": width,
+                    "y1": function (d) { return y(d); },
+                    "y2": function (d) { return y(d); }
+                });
+            };
+
+            /* draws a line graph for a data series
+            --paramters--
+                data: an array of datum objects, with members that correspond to the values for the x and y coordinates
+                options: optional paramters including
+                · class: a string that will be included in the class attribute for this svg element
+                · x: the member of each datum object in the dataset that will be the x-coordinate (default is "x")
+                · y: the member of each datum object in the dataset that will be the x-coordinate (default is "y")
+                idx: an integer indicating the index for this series (as it may be one of many for a multi-plot)
+             */
+            this.drawLine= function (data, options, idx) {
+
+                var x = this.x;
+                var y = this.y;
+
+                options = options || {};
+                var x_coord = options.x || "x";
+                var y_coord = options.y || "y";
+                var className = options.class || "";
+
+                this.line = d3.svg.line()
+                    .x(function (d) {
+                        return x(d[x_coord]);
+                    })
+                    .y(function (d) {
+                        return y(d[y_coord]);
+                    });
+
+                this.svg.append("path")
+                          .datum(data)
+                          .attr("class", className + " color"+idx)
+                          .attr("d", this.line);
+
+            };
+
+            /* draws a scatter plot for a data series
+            --paramters--
+                data: an array of datum objects, with members that correspond to the values for the x and y coordinates
+                options: optional paramters including
+                · text: a string that will show when the mouse pointer is hovering over the data point
+                · x: the member of each datum object in the dataset that will be the x-coordinate (default is "x")
+                · y: the member of each datum object in the dataset that will be the x-coordinate (default is "y")
+                · onclick: the handler that is invoked when the data point is clicked
+                series_idx: an integer indicating the index for this series (as it may be one of many for a multi-plot)
+             */
+            this.drawDataPoints = function (data, options, series_idx) {
+
+                var x = this.x;
+                var y = this.y;
+
+                options = options || {};
+                var x_coord = options.x || "x";
+                var y_coord = options.y || "y";
+                var text = options.text || "";
+                var onclick = options.onclick || null;
+                var series_idx = series_idx || 0;
+
+                this.svg.selectAll(".data_point"+ series_idx)
+                    .data(data)
+                    .enter().append("g")
+                    .attr("class", "data_point data_point"+ series_idx);
+
+                this.svg.selectAll(".data_point"+ series_idx)
+                    .data(data)
+                    .append("circle")
+                    .attr("class", "dot color" + series_idx)
+                    .attr("r", 3.5)
+                    .attr("cx", function (d) { return x(d[x_coord]); })
+                    .attr("cy", function (d) { return y(d[y_coord]); })
+                    .on("click", onclick);
+
+                if (text) {
+                    this.svg.selectAll(".data_point"+ series_idx)
+                    .data(data).append("text")
+                    .attr("class", "datum_info")
+                    .text(function (d) { return d[text] })
+                    .attr("x", function (d) { return x(d[x_coord]) + 5; })
+                    .attr("y", function (d) { return y(d[y_coord]); })
+                    .style("fill", "black");
+
+                    $('.dot').mouseover(
+                    function () {
+                        $(this).siblings('text').show();
+                    });
+
+                    $('.dot').mouseout(
+                    function () {
+                        $(this).siblings('text').hide();
+                    });
+                }
+            };
+
+            /* draws bars for a data series
+            --paramters--
+                data_series: an array of datum objects, with members that correspond to the values for the x and y coordinates
+                i: an integer indicating the index for this series (as it may be one of many for a multi-plot)
+                options: optional paramters including
+                · x: the member of each datum object in the dataset that will be the x-coordinate (default is "x")
+                · y: the member of each datum object in the dataset that will be the x-coordinate (default is "y")
+             */
+            this.drawBars = function (data_series, i, options) {
+                var y = this.y;
+                var x = this.x;
+                var height = this.height;
+
+                options = options || {};
+                var x_coord = options.x || "x";
+                var y_coord = options.y || "y";
+
+                var bar = this.svg.selectAll(".bar" + i)
+                .data(data_series)
+                .enter().append("g")
+                .attr("class", "bar")
+                .attr("transform", function (d) { return "translate(" + x(d[x_coord]) + "," + y(d[y_coord]) + ")"; });
+
+                bar.append("rect")
+                .attr("x", 1)
+                .attr("class", "color" + i)
+                .attr("width", x(data_series[0].dx) - 1)
+                .attr("height", function (d) { return height - y(d[y_coord]); });
+            };
+
+            /* draws a box plot for a data series
+            --paramters--
+                data: an object with members corresponding to basic stats such as:
+                · Percentile_05
+                · Percentile_95
+                · Percentile_25
+                · Percentile_75
+                · Percentile_50
+                · Mean
+                i: an integer indicating the index for this series (as it may be one of many for a multi-plot)
+             */
+            this.drawBoxPlot = function (data, i) {
+
+                var boxWidth = 100;
+                var y = this.y;
+
+                var g = this.svg
+                .append("g")
+                .attr("class", "box")
+                .attr("width", boxWidth)
+                .attr("height", this.height + this.margin.bottom + this.margin.top)
+                .attr("transform", "translate(" + (100 * (i + 1)) + "," + this.margin.top + ")")
+
+
+                g.append("line")
+                .attr("class", "center color" + i)
+                .attr("x1", boxWidth / 4)
+                .attr("y1", function (d, i) { return y(data.Percentile_05); })
+                .attr("x2", boxWidth / 4)
+                .attr("y2", function (d) { return y(data.Percentile_95); })
+
+                    g.append("rect")
+              .attr("class", "box color" + i)
+              .attr("x", 0)
+              .attr("y", function (d) { return y(data.Percentile_75); })
+              .attr("width", boxWidth / 2)
+              .attr("height", function (d) { return y(data.Percentile_25) - y(data.Percentile_75); });
+
+                    // median line.
+                    g.append("line")
+              .attr("class", "median color" + i)
+              .attr("x1", 0)
+              .attr("y1", y(data.Percentile_50))
+              .attr("x2", boxWidth / 2)
+              .attr("y2", y(data.Percentile_50));
+
+                    //whisker
+                    g.append("line")
+              .attr("class", "whisker color" + i)
+              .attr("x1", 0)
+              .attr("y1", y(data.Percentile_05))
+              .attr("x2", boxWidth / 2)
+              .attr("y2", y(data.Percentile_05));
+
+                    g.append("line")
+              .attr("class", "whisker color" + i)
+              .attr("x1", 0)
+              .attr("y1", y(data.Percentile_95))
+              .attr("x2", boxWidth / 2)
+              .attr("y2", y(data.Percentile_95));
+
+                    //mean dot
+                    g.append("circle")
+              .attr("class", "mean color" + i)
+              .attr("cx", boxWidth / 4)
+              .attr("cy", y(data.Mean))
+              .attr("fill", "Gray")
+              .attr("r", 3);
+
+                // Compute the tick format.
+                var format = y.tickFormat(8);
+
+                    // Update box ticks.
+                    g.append("text")
+              .attr("class", "box")
+              .attr("dy", ".3em")
+              .attr("dx", function (d, i) { return i & 1 ? 6 : -6 })
+              .attr("x", function (d, i) { return i & 1 ? width : 0 })
+              .attr("y", y(data.Percentile_25))
+              .attr("text-anchor", function (d, i) { return i & 1 ? "start" : "end"; })
+              .text(format(data.Percentile_25));
+
+                    g.append("text")
+              .attr("class", "box")
+              .attr("dy", ".3em")
+              .attr("dx", function (d, i) { return i & 1 ? 6 : -6 })
+              .attr("x", function (d, i) { return i & 1 ? width : 0 })
+              .attr("y", y(data.Percentile_75))
+              .attr("text-anchor", function (d, i) { return i & 1 ? "start" : "end"; })
+              .text(format(data.Percentile_75));
+
+
+                    g.append("text")
+              .attr("class", "whisker")
+              .attr("dy", ".3em")
+              .attr("dx", 6)
+              .attr("x", boxWidth / 2)
+              .attr("y", y(data.Percentile_05))
+              .text(format(data.Percentile_05))
+
+                    g.append("text")
+              .attr("class", "whisker")
+              .attr("dy", ".3em")
+              .attr("dx", 6)
+              .attr("x", boxWidth / 2)
+              .attr("y", y(data.Percentile_95))
+              .text(format(data.Percentile_95))
+
+                    g.append("text")
+              .attr("class", "mean")
+              .attr("dy", ".3em")
+              .attr("dx", 6)
+              .attr("x", boxWidth / 2)
+              .attr("y", y(data.Mean))
+              .text(format(data.Mean))
+
+            };
+
+            /* A utility function to process an array of raw values and return an array used to plot a histogram
+                each element in the array is an object that represents a bin. it has the following members:
+                · x: the lower limit this bin represents
+                . y: the frequency of values in this bin
+                . dx: the width of this bin
+            */
+            this.bucketData = function (unbucketed_data, bins) {
+                var histogram = d3.layout.histogram();
+                histogram.bins(bins);
+                var data = histogram(unbucketed_data);
+                return data.map(function(el){ return {x: el.x, y: el.y, dx: el.dx}});
+
+            };
+
+            /* A function to invoke a change color animation for a particular data series
+            --paramters00
+            series_idx: the index of the series whose color will change
+            selectedColor: the desired color that it will be changed to
+            */
+            this.changeColors = function (series_idx, selectedColor) {
+
+                d3.selectAll('rect.color' + series_idx).transition().duration(function (d, i) {
+                    return i * 100;
+                }).style("fill", selectedColor);
+
+                d3.selectAll('path.color' + series_idx).transition().duration(1000).style("stroke", selectedColor);
+                d3.selectAll('circle.color' + series_idx).transition().duration(1000).style("fill", selectedColor);
+                $('.color' + series_idx + " .legend").css('background-color', selectedColor);
+                $('.color' + series_idx).css('color', selectedColor);
+            };
+
+        }; //end of dariPlotter
     
     </script>
 
@@ -123,9 +541,6 @@
                 <%foreach(var data_option in (List<string>) ViewData["dataSourceOptions"] ){ %>
                     <li><a href="#"><%= data_option %></a></li>
                 <%} %>
-             <%--     <li><a href="#">SEMA</a></li>
-                  <li><a href="#">DCA</a></li>
-                  <li><a href="#">SEMA2</a></li>--%>
                 </ul>
             </div>
         </div>
@@ -141,7 +556,6 @@
         </div>
         <div id="footer">
             </div>
-
 
         <asp:ContentPlaceHolder ID="absolutelyPositionedContent" runat="server" />
 </body>

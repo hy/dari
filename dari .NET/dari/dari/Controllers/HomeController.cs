@@ -6,6 +6,7 @@ using System.Web.Mvc;
 
 namespace dari.Controllers
 {
+    /*This class controlls all the code that serves general pages for DARI */
     [HandleError]
     [InitializeFilter]
     public class HomeController : Controller
@@ -18,7 +19,7 @@ namespace dari.Controllers
             string recentPlotsHTML = "";
             bool hasNoRecentPlots = true; ;
             
-            //Get Saved Queries for Display
+            //Get Saved Queries from the cookies for Display
             for (int i = 0; i < 10; i++)
             {
                 label = "";
@@ -43,18 +44,19 @@ namespace dari.Controllers
 
         }
 
+        //Page for browser uncompatibility notification
         public ActionResult UnsupportedBrowser()
         {
             return PartialView("UnsupportedBrowser");
         }
 
-
+        //This is a request to store the last selected source from the browser
         [HttpPost]
-        public ActionResult saveSelectedSource(string source_name)
+        public void saveSelectedSource(string source_name)
         {
 
             Response.Cookies.Add(new HttpCookie("last_source", source_name));
-            return new EmptyResult();
+            //return new EmptyResult();
         }
 
 

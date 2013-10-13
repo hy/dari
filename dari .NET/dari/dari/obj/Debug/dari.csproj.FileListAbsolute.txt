@@ -1,9 +1,0 @@
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\dari.dll
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\dari.pdb
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\System.Web.Abstractions.dll
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\System.Web.Mvc.dll
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\System.Web.Routing.dll
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\bin\System.Web.Mvc.xml
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\dari.dll
-C:\Users\naudegbu\Documents\GitHub\dari\dari .NET\dari\dari\obj\Debug\dari.pdb

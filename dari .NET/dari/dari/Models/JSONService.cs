@@ -9,6 +9,8 @@ using System.Configuration;
 
 namespace dari.Models
 {
+    /* This class manages making json requests to external sources. It also includes, a mock "SEMA" server in case
+     * no external data source is available */
     public class JSONService
     {
         SEMAService semaService = new SEMAService();
@@ -29,6 +31,40 @@ namespace dari.Models
             }
 
             return results;
+        }
+
+
+
+        /*Performs an http request to the respective data source
+         * 
+         * Parameters
+         * address: the pre-configured address of the data source
+         * request: The actual request being made
+         * parameters: The dictionary object of parameters
+         * 
+         * Returns:
+         * String of result
+         */
+        private string makeExternalRequest(string address, string request, Dictionary<string, object> parameters)
+        {
+            if (!address.Equals("native"))
+            {
+                string request_params = new JavaScriptSerializer().Serialize(parameters);
+                WebRequest webRequest = WebRequest.Create(
+                  address + "request=" + request + "&parameters=" + request_params);
+
+                WebResponse response = webRequest.GetResponse();
+
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                string responseFromServer = reader.ReadToEnd();
+
+                return responseFromServer;
+            }
+            else
+            {
+                return semaServer(request, parameters);
+            }
         }
 
         //simulating SEMA server
@@ -59,8 +95,8 @@ namespace dari.Models
                     
 
                 /* for advanced analysis*/
-                case "correlation":
-                    results = semaService.correlation(parameters);
+                case "getFilteredPlottingData":
+                    results = semaService.getFilteredPlottingData(parameters);
                     break;
                 case "getFilterOptions":
                     results = semaService.getFilterOptions();
@@ -77,41 +113,18 @@ namespace dari.Models
                 case "getData":
                     results = semaService.getData(parameters);
                     break;
-                case "getReportInfo":
-                    results = semaService.getReportInfo(parameters);
-                    break;
 
                 default:
                     results = null;
                     break;
             }
 
-            string results_str = new JavaScriptSerializer().Serialize(results);
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            serializer.MaxJsonLength = Int32.MaxValue;
+            string results_str = serializer.Serialize(results);
             return results_str;
         }
 
-
-        private string makeExternalRequest(string address, string request, Dictionary<string, object> parameters)
-        {
-            if (!address.Equals("native"))
-            {
-                string request_params = new JavaScriptSerializer().Serialize(parameters);
-                WebRequest webRequest = WebRequest.Create(
-                  address + "request=" + request + "&parameters=" + request_params);
-
-                WebResponse response = webRequest.GetResponse();
-
-                Stream dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-                string responseFromServer = reader.ReadToEnd();
-
-                return responseFromServer;
-            }
-            else
-            {
-                return semaServer(request, parameters);
-            }
-        }
     }
 
 }

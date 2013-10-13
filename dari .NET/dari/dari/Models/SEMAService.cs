@@ -7,6 +7,8 @@ using System.Collections;
 
 namespace dari.Models
 {
+    /* This class emulates an external data source.
+     * All the requests, that DARI makes, are documented here */
     public class SEMAService
     {
 
@@ -276,7 +278,7 @@ and [HostLifetime_LINtable].HostIndex = [CPUBasedPrimaryIndexMap_LINtable].HostI
             }
             query += "(1=0) ) order by Timestamp";
 
-            query += (" END ELSE " + query.Replace("_LIN", "_WIN"));
+            query += (" END ELSE " + query.Replace("WIN", "LIN"));
 
             query = ("IF  NOT EXISTS (SELECT * FROM LINemma_v5_db_MsrOtherHistory.sys.tables WHERE name = 'MsrOtherHistory_" + hostName + "_LINtable') BEGIN " + query);
 
@@ -315,7 +317,7 @@ and [HostLifetime_LINtable].HostIndex = [CPUBasedPrimaryIndexMap_LINtable].HostI
 
         /*advanced analysis */
 
-        public Object correlation(Dictionary<string, object> parameters)
+        public Object getFilteredPlottingData(Dictionary<string, object> parameters)
         {
 
             var columns = new Dictionary<string, string>
@@ -455,73 +457,6 @@ where CPUBasedPrimaryIndexMap_WINtable.HostIndex = CPUPrimaryCPUInfoProcessed_WI
                     pc_header.Add(productClasslevelVal);
             }
             return string.Join(" ", pc_header);
-        }
-
-        public object getReportInfo(Dictionary<string, object> parameters){
-            
-           string os = (string)parameters["os"];
-            string Analysis = (string)parameters["analysis"];
-            string Classification = (string)parameters["classification"];
-            string Date = (string)parameters["date"];
-            ArrayList NodeIds = (ArrayList)parameters["NodeID"];
-            string ParameterName = (string)parameters["ParameterName"];
-
-            string query;
-
-
-             SqlConnection myConnection = new SqlConnection(connectionString);
-            myConnection.Open();
-
-               query = String.Format(@"SELECT distinct ProdClassBitMask,PCLvl_01,PCLvl_02,PCLvl_03,PCLvl_04,
-		PCLvl_05,PCLvl_06,PCLvl_07,PCLvl_08,PCLvl_09,PCLvl_10,PCLvl_11,PCLvl_12,PCLvl_13,
-		PCLvl_14,PCLvl_15,PCLvl_16,PCLvl_17,PCLvl_18,PCLvl_19,PCLvl_20 
-		FROM [emma_v5_db].[dbo].[Report_ProdClassHeaders_{0}table]
-		WHERE AnalysisName='{1}' 
-		AND ProdClassBitMask={2}
-        AND AnalysisTimestamp={3} ", os, Analysis,Classification, Date);
-
-            
-            SqlCommand myCommand = new SqlCommand(query, myConnection);
-            SqlDataReader myReader = null;
-            myReader = myCommand.ExecuteReader();
-            
-            myReader.Read();
-            
-            string pc_header= getPCHeader(myReader);
-            
-            myReader.Close();
-
-
-            query = String.Format(@"SELECT NodeID,NumLogical,NumCores,NumPhysical,NumHosts,PCLvl_01,PCLvl_02,PCLvl_03,
-		PCLvl_04,PCLvl_05,PCLvl_06,PCLvl_07,PCLvl_08,PCLvl_09,PCLvl_10,PCLvl_11,PCLvl_12,PCLvl_13,
-		PCLvl_14,PCLvl_15,PCLvl_16,PCLvl_17,PCLvl_18,PCLvl_19,PCLvl_20 
-		FROM [emma_v5_db].[dbo].[Report_ProdClassNodes_{0}table]
-		WHERE AnalysisName='{1}' 
-		AND ProdClassBitMask={2}
-		AND AnalysisTimestamp={3}
-		ORDER BY NodeID", os, Analysis, Classification, Date);
-
-            myCommand = new SqlCommand(query, myConnection);
-            myReader = null;
-            myReader = myCommand.ExecuteReader();
-
-
-            Dictionary<string, string> classes = new Dictionary<string, string>();
-            while (myReader.Read())
-            {
-                classes[((int)myReader["NodeID"]).ToString()] = getNodeClass(myReader);
-
-            }
-
-            myReader.Close();
-            myConnection.Close();
-
-            return new {
-                classification_name = pc_header,
-                nodeClasses = classes
-                    };
-
-
         }
 
         public Object getAnalysisOptions(Dictionary<string, object> parameters)

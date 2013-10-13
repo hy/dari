@@ -8,11 +8,15 @@ using dari.Models;
 
 namespace dari.Controllers
 {
+    /*This class implements the filter that is called before all the DARI controllers, to handle issues like
+     * *making sure that the write browser is used
+     * *mananging the current what is the data source DARI is currently connected to
+     */
     public class InitializeFilterAttribute : ActionFilterAttribute
     {
-        //
-        // GET: /InitializeFilterAttribute/
-
+        //This function popupulates the datasource menu with options from the configuration file,
+        //It also checks the URL to make sure the right datasource is saved,
+        //If there is no source in the url, it will update the display with the last selected data source
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             var Request = filterContext.HttpContext.Request;
@@ -37,7 +41,7 @@ namespace dari.Controllers
 
         }
 
-
+        //Check the browser. If the browser is not supported, then redirect to the notification page
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var Request = filterContext.HttpContext.Request;

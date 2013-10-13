@@ -25,20 +25,45 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
 
 <script>
-    var lifeTimes = {};
-    var selectedLifeTime;
+    var lifeTimes = {}; //associative array mapping lifetime birth times to an object with {index and deathtime}
+    var selectedLifeTime; //the selected lifetime (identified by the birthtime)
 
- function getInfo(hostname, callback) {
+    /*This function calls the JSON api to get info for the given host */
+    function getInfo(hostname, callback) {
 
+        /*Calling JSON API to get the information for host with the given hostname
+        Returns data to call back function, as an array of objects, corresponding to Lifetimes
+        Each lifetime object, contains 
+	        · Birthtime- a time stamp for the beginning of the lifetime
+	        · Deathtime: - a time stamp for the beginning of the lifetime
+	        · HostIndex- the identifier for the host in the system
+	        · HostPlatform- the platform of the host
+	        · NumCores- number of cores
+	        · NumLogical- number of logical cores
+	        · NumPhysical- number of sockets
+	        · PrimaryHostIndex- primary identifier
+	        · TotalMemory- total memory
+	        · Cpus[]- An array of objects corresponding to logical cpus:
+			        · BrandString
+			        · CPUNum: 1
+			        · CoreID: 0
+			        · PhysID: 0
+			        · ProductFamily:
+            · timeIntervalLabel- a string that puts the birthtime to death time range in readable format ex."December 18, 2012- March 31, 2013"
+        */
         $.getDariJson("byUser","getHostInfo", { hostname: hostname }, function (data) {
+
+            //write header
             $('#lifetime_info').empty();
             $('#lifetime_info').append('<h2> Information for ' + hostname + ' </h2>');
-            data.forEach(function (lifetime, idx) {
-                var Birthtime = new Date(lifetime.Birthtime * 1000);
-                var Deathtime = new Date(lifetime.Deathtime * 1000);
 
+            //process each lifetime
+            data.forEach(function (lifetime, idx) {
+
+                //store lifetime information
                 lifeTimes[lifetime.Birthtime] = {index: idx, death: lifetime.Deathtime};
                 
+                //add a panel of information for each lifetime
                 $('#panels').append("<h1>"+lifetime.timeIntervalLabel+"<span class='details'></span></h1>");
                 $('#panels').append("<div>"+lifetime.HostPlatform+" platform<div>");
                 $('#panels div').last().append("<ul></ul>");
@@ -47,10 +72,12 @@
                 $('#panels ul').last().append("<li>"+lifetime.NumCores+" cores</li>");
                 $('#panels ul').last().append("<li>"+lifetime.NumLogical+" logical cores: <span class='instructions'>Select desired cores and parameter to plot</span></li>");
 
-                var tableHTML = '<table><thead><tr><th>ID</th><th>Brand</th><th>Product Family</th><th>on Core</th><th> in Soc.</th><th>Select</th></tr></thead><tbody>';
-                
+
+                //print table with row for each cpu
                 var cpuInfo;
                 var cpuCount = (lifetime.cpus)? lifetime.cpus.length : 0;
+
+                var tableHTML = '<table><thead><tr><th>ID</th><th>Brand</th><th>Product Family</th><th>on Core</th><th> in Soc.</th><th>Select</th></tr></thead><tbody>';
                 for (var i = 0; i<cpuCount; i++){
                     cpuInfo = lifetime.cpus[i];
                     tableHTML += ('<tr><td>'+cpuInfo.CPUNum+'</td><td>'+cpuInfo.BrandString+'</td><td>'
@@ -58,16 +85,17 @@
                                     +cpuInfo.PhysID+'</td><td><input type="checkbox" name="cpu" value="'+cpuInfo.CPUNum+'"></td></tr>');
                 }
                 tableHTML += '</tbody></table>';
-
                 $('#panels div').last().append(tableHTML);
-                $('#panels div').last().append("<br /><div class='styled-select'><select><option>Select Parameter</option><option>Temperature MSR</option><option>CPU Utilization</option></select></div><button onclick='plotLifetime("+lifetime.Birthtime+","+lifetime.Deathtime+","+idx+")'>Plot Selected Cores</button/>");
+
+                //add buttons and controls to choose this lifetime
+                $('#panels div').last().append("<br /><div class='styled-select'><select><option>Select Parameter</option><option>Temperature MSR</option></select></div><button onclick='plotLifetime("+lifetime.Birthtime+","+lifetime.Deathtime+","+idx+")'>Plot Selected Cores</button/>");
             });
 
+            //style the panel display
             $('#panels').accordion({
                 heightStyle: "content",
                 collapsible: true,
                 activate: function( event, ui ) {
-                    
                     //ui.oldPanel.find('input:checkbox').removeAttr('checked');
                 },
                 create: callback
@@ -76,12 +104,12 @@
         });
     }
 
+    // Close panels and display plot
     function plotLifetime(birth, death, idx){
         selectedLifeTime = idx;
 
-
-         $('#panels h1 span').text('');
-         $('#panels h1').css('background-color','');
+        $('#panels h1 span').text('');
+        $('#panels h1').css('background-color','');
 
         $("#startDatePicker").datepicker("setDate", new Date(birth*1000));
         $("#endDatePicker").datepicker("setDate", new Date(death*1000));
@@ -92,148 +120,67 @@
         $('#plotCanvas').show();
         plotTemp(true);
     }
-    
 
-    var margin = { top: 20, right: 20, bottom: 30, left: 50 },
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-    var parseDate = d3.time.format("%d-%b-%y").parse;
-
-    var x = d3.time.scale()
-    .range([0, width]);
-
-    var y = d3.scale.linear()
-    .range([height, 0]);
-
-    var xAxis = d3.svg.axis()
-    .scale(x)
-    .tickFormat(d3.time.format("%d-%b-%y"))
-    .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-
-    var line = d3.svg.line()
-    .x(function (d) {
-        return x(d.date);
-    })
-    .y(function (d) {
-        return y(d.close);
-    });
-
-
+    /*This function calls the dari JSON api to get the data to plot 
+    --Parameters--
+    save: (optional) a boolean that indicates whether or not a plot query string will be saved for this plot
+    */
     function plotTemp(save) {
         loadingImg("show","Generating Plot");
-        save = save || false;
 
-        var checkedCPUs = [];
+        save = save || false; //default value of save is FALSE. (Any plots from zooming in and out, should not be saved)
 
-        $('#panels tbody').eq(selectedLifeTime).find("input:checked").each(function (idx, el) {
-                checkedCPUs.push(el.value);
-            });
-
-        $('#panels h1').eq(selectedLifeTime).find('.details').text(" (Temperature for cores "+checkedCPUs.join(", ")+")");
-
-
+        //Get the start and end times for this plot
         var startDate = ($("#startDatePicker").datepicker("getDate")).valueOf()/1000;
         var endDate = ($("#endDatePicker").datepicker("getDate")).valueOf() / 1000;
 
+        //Process which CPUs will be plotted
+        var checkedCPUs = [];
+        $('#panels tbody').eq(selectedLifeTime).find("input:checked").each(function (idx, el) {
+                checkedCPUs.push(el.value);
+            });
+        $('#panels h1').eq(selectedLifeTime).find('.details').text(" (Temperature for cores "+checkedCPUs.join(", ")+")");
 
+
+        /*Calling JSON API to get the data to plot. Returns the relevant data points (time vs variable) to plot a time series
+        Returns data to call back function, as an array of objects that correspond to a data point. Each object contains:
+	        · timestamp: The time stamp for this measurement
+	        · value: The value of this measurement
+	        · cpu: The cpu on which this measurement was taken
+
+        */
         $.getDariJson("byUser","getHostData", { hostName: '<%= ViewData["hostName"] %>', cpus: checkedCPUs, start: startDate, end: endDate, lifetimeIdx: selectedLifeTime, save: save, os: '<%= ViewData["os"] %>' },
             function (data) {
 
-                byCpu = {};
-                var cpuIndex = {};
-
-                checkedCPUs.forEach(function (cpuNum, c) {
+                //CPU bookkeeping
+                var byCpu = {}; //stores an array for each cpu
+                checkedCPUs.forEach(function (cpuNum, idx) {
                     byCpu[cpuNum] = [];
-                    cpuIndex[cpuNum]=c;
                 });
 
+                //Group the datapoints into arrays by cpuNum
                 data.forEach(function (d) {
                     d.date = new Date(d.timestamp * 1000);
                     d.close = d.value;
+                    d.dateString = d.date.toTimeString();
 
                     byCpu[d.cpu].push(d);
-
                 });
 
-
+                /*Start bulding plot foundation */
                 $('svg').remove();
+                var dariPlot = new dariPlotter("#plotCanvas div");
+                dariPlot.drawYaxis("Temperature Register Value", data, { coordinate: "close" });
+                dariPlot.drawXaxis("Date", data, {coordinate: "date", plotType: dariPlot.plotTypes.TIME_SERIES});
+                dariPlot.drawHorizontalGrids();
 
-
-                var svg = d3.select("#plotCanvas div").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                x.domain(d3.extent(data, function (d) { return d.date; }));
-                y.domain(d3.extent(data, function (d) { return d.close; }));
-
-                svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-                svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Temperature Restiger Value");
-
-
-
+                //Plot each data series for each cpu 
                 checkedCPUs.forEach(function (cpuNum, idx) {
-                    svg.append("path")
-                          .datum(byCpu[cpuNum])
-                          .attr("class", "line color" + idx)
-                          .attr("d", line);
-
+                    dariPlot.drawLine(byCpu[cpuNum], {x: "date", y: "close", class: "line"}, idx);
+                    dariPlot.drawDataPoints(byCpu[cpuNum], {x: "date", y: "close", text: "dateString"}, idx);
                 });
 
-
-
-
-                svg.selectAll(".data_point")
-                      .data(data)
-                    .enter().append("g")
-                      .attr("class", "data_point");
-
-                svg.selectAll(".data_point")
-                .data(data)
-                .append("circle")
-                .attr("class", function (d) { return "dot color" + cpuIndex[d.cpu]; })
-                .attr("r", 3.5)
-                .attr("cx", function (d) { return x(d.date); })
-                .attr("cy", function (d) { return y(d.close); })
-                ;
-
-                svg.selectAll(".data_point")
-                .data(data).append("text")
-                      .attr("class", "datum_info")
-                      .text(function (d) { return d.date.toTimeString() })
-                      .attr("x", function (d) { return x(d.date) + 5; })
-                      .attr("y", function (d) { return y(d.close); })
-                      .style("fill", "black");
-
-                $('.dot').mouseover(
-                    function () {
-                        $(this).siblings('text').show();
-                    });
-
-                $('.dot').mouseout(
-                    function () {
-                        $(this).siblings('text').hide();
-                    });
-
-
+                //implementing ability to zoom in and out of plot
                 $('svg').get(0).addEventListener("mousewheel", function (e) {
 
                     var range = endDate - startDate;
@@ -254,49 +201,53 @@
                 loadingImg("hide");
             }
         );
-
-
     }
 
 
-
-
-
-    $(document).ready(function () {
+    //intialization
+    $(function () {
     
+        //Activate date picking ui
         $("#startDatePicker").datepicker();
         $("#endDatePicker").datepicker();
 
+        //Get host name from url parameter and process
         selectedHost = '<%= ViewData["hostName"] %>';
         if (selectedHost.length > 0) {
+            //get and display info for given host, and then see if there is any more information in the url parameters, to proceed with plotting 
             getInfo(selectedHost, function (){
 
-            var lifetimeIdx = '<%= ViewData["lifetimeIdx"] %>';
-            var lifetimeLabel = '<%= ViewData["lifetimeLabel"] %>';
-            var start = '<%= ViewData["start"] %>';
-            var end = '<%= ViewData["end"] %>';
+                //extract info from url parameters
+                var lifetimeIdx = '<%= ViewData["lifetimeIdx"] %>';
+                var lifetimeLabel = '<%= ViewData["lifetimeLabel"] %>';
+                var start = '<%= ViewData["start"] %>';
+                var end = '<%= ViewData["end"] %>';
 
-            if(lifeTimes[lifetimeLabel]){
-                lifetimeIdx = lifeTimes[lifetimeLabel].index.toString();
-                start = lifetimeLabel;
-                end = lifeTimes[lifetimeLabel].death;
-            }
+                //if there is a selected lifetime in the parameters, deduct info about that lifetime
+                if(lifeTimes[lifetimeLabel]){
+                    lifetimeIdx = lifeTimes[lifetimeLabel].index.toString();
+                    start = lifetimeLabel;
+                    end = lifeTimes[lifetimeLabel].death;
+                }
 
+                //Proceed with selected lifetime
+                if (lifetimeIdx.length > 0) {
 
-            if (lifetimeIdx.length > 0) {
+                    //Check the respective cpu check boxes
+                    <% var serializer = new System.Web.Script.Serialization.JavaScriptSerializer(); %>
+                    <%= serializer.Serialize((string[]) ViewData["cpus"]) %>.forEach(function(cpuNum){
+                        $('#panels tbody').eq(lifetimeIdx).find("input[value='"+cpuNum+"']").attr("checked",true);
+                    });
 
-                <% var serializer = new System.Web.Script.Serialization.JavaScriptSerializer(); %>
-                <%= serializer.Serialize((string[]) ViewData["cpus"]) %>.forEach(function(cpuNum){
-                    $('#panels tbody').eq(lifetimeIdx).find("input[value='"+cpuNum+"']").attr("checked",true);
-                });
+                    //close panels and plot
+                    $('#panels h1').eq(lifetimeIdx).click();
+                    plotLifetime(start, end, lifetimeIdx);
+                }
 
-                $('#panels h1').eq(lifetimeIdx).click();
-                plotLifetime(start, end, lifetimeIdx);
-            }
-            });
-        }
+            });//end of getInfo call
+        } //end of '(selectedHost.length > 0)'
 
-    });
+    }); // end of intialization
 </script>
 
 <style>

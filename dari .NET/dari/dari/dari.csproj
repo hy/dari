@@ -98,10 +98,9 @@
     <Content Include="Content\images\small_ajax.gif" />
     <Content Include="Views\byUser\HostPage.aspx" />
     <Content Include="Views\byUser\SearchHosts.aspx" />
-    <Content Include="Views\Home\Home.ascx" />
-    <Content Include="Views\Reports\Index.aspx" />
-    <Content Include="Views\Advanced\correlation.aspx" />
-    <Content Include="Views\Reports\Output.aspx" />
+    <Content Include="Views\Reports\ReportOptions.aspx" />
+    <Content Include="Views\Advanced\Analytics.aspx" />
+    <Content Include="Views\Reports\ReportDisplay.aspx" />
     <Content Include="Views\Shared\UnsupportedBrowser.ascx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -113,10 +112,8 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Content\Site.css" />
-    <Content Include="Views\Home\About.aspx" />
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
-    <Content Include="Views\Shared\LogOnUserControl.ascx" />
     <Content Include="Views\Shared\Site.Master" />
     <Content Include="Views\Web.config" />
   </ItemGroup>

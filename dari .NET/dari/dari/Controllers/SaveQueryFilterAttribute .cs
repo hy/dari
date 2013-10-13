@@ -6,10 +6,12 @@ using System.Web.Mvc;
 
 namespace dari.Controllers
 {
+    /* SaveQueryFilterAttribute:
+     * This filter is called to save a query, and store it as a url in the browser cookies.
+     * It saves up to 10 recent plots
+     * */
     public class SaveQueryFilterAttribute : ActionFilterAttribute
     {
-        public string newUrlLabel;
-
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             var Request = filterContext.HttpContext.Request;

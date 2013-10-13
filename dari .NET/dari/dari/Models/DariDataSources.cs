@@ -6,6 +6,8 @@ using System.Configuration;
 
 namespace dari.Models
 {
+    /*These classes are used to easily access the Data Source configuration section in
+     * Web.config to manage the various connection options */
     public class DariDataSources
     {
         dariDataConfigSection config;
